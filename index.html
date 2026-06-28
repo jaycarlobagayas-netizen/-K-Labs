@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0a0608" />
+<title>BPED PFT Analytics — Physical Fitness Test Tabulation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syncopate:wght@400;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<!-- Firebase (optional cloud sync) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<style>
+:root{
+  --bg:#0a0608; --panel:#130d0f; --panel-2:#1a1214;
+  --maroon:#6b1320; --maroon-bright:#a52338; --maroon-deep:#330911;
+  --gold:#f2b705; --gold-soft:#ffd95e; --gold-deep:#c8960a;
+  --text:#f6efe6; --muted:#b3a39c;
+  --line:rgba(255,255,255,.08); --line-gold:rgba(242,183,5,.28);
+  --radius:22px; --maxw:1280px;
+  --grok:'Space Grotesk',sans-serif; --display:'Syncopate',sans-serif;
+  --ok:#3fbf7f; --warn:#f2b705; --bad:#e0563f;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:var(--gold-soft)}
+.display{font-family:var(--display);letter-spacing:.06em}.grok{font-family:var(--grok)}
+.muted{color:var(--muted)}.gold{color:var(--gold)}.hidden{display:none!important}
+img{max-width:100%}
+svg.lucide{width:1.05em;height:1.05em;stroke-width:2.1;vertical-align:-.17em}
+.card h3 svg.lucide{color:var(--gold)}
+.btn svg.lucide{width:1em;height:1em;margin-right:5px;vertical-align:-.14em}
+.tab svg.lucide{margin-right:5px}
+.stat .ico{color:var(--gold-deep);float:right;opacity:.5}
+.stat .ico svg.lucide{width:22px;height:22px}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:#2a2024;border-radius:8px}
+.bg-blobs{position:fixed;inset:0;overflow:hidden;z-index:0;pointer-events:none}
+.blob{position:absolute;border-radius:50%;filter:blur(10px)}
+.blob.b1{width:540px;height:540px;background:radial-gradient(circle,rgba(165,35,56,.30),transparent 65%);top:-160px;left:-120px}
+.blob.b2{width:480px;height:480px;background:radial-gradient(circle,rgba(242,183,5,.14),transparent 65%);bottom:-200px;right:-100px}
+.btn{font:inherit;font-weight:600;font-size:.86rem;border-radius:12px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);padding:10px 16px;cursor:pointer;transition:transform .15s,box-shadow .2s,border-color .2s,background .2s;white-space:nowrap;display:inline-flex;align-items:center}
+.btn:hover{border-color:var(--line-gold);transform:translateY(-1px)}
+.btn-gold{background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:#1a0a0e;border:none}
+.btn-gold:hover{box-shadow:0 12px 30px rgba(242,183,5,.32)}
+.btn-maroon{background:linear-gradient(135deg,var(--maroon-bright),var(--maroon));color:#fff;border:none}
+.btn-ghost{background:transparent}
+.btn-sm{padding:6px 11px;font-size:.78rem;border-radius:9px}
+.pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line-gold);border-radius:999px;padding:6px 14px;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);background:rgba(242,183,5,.05)}
+label.fld{display:block;margin-bottom:12px}
+label.fld span{display:block;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;font-weight:600}
+input,select{width:100%;font:inherit;font-size:.92rem;background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:11px;padding:10px 12px;transition:border-color .2s}
+input:focus,select:focus{outline:none;border-color:var(--gold)}
+input[readonly]{opacity:.65;cursor:not-allowed}
+select option{background:var(--panel)}
+#loginView{position:relative;z-index:2;min-height:100vh;display:grid;place-items:center;padding:28px}
+.login-card{width:min(460px,100%);background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:var(--radius);padding:34px 30px;box-shadow:0 30px 80px rgba(0,0,0,.55)}
+.login-brand{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.login-brand img{width:52px;height:52px;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))}
+.login-brand .seal{width:52px;height:52px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--gold-soft),var(--gold) 55%,var(--gold-deep));display:grid;place-items:center;color:var(--maroon-deep);font-weight:900;font-size:.7rem;border:2px solid var(--gold-soft)}
+.login-brand h1{font-family:var(--grok);font-size:1.18rem;margin:0;font-weight:700;line-height:1.1}
+.login-brand small{color:var(--muted);font-size:.7rem;letter-spacing:1.4px;text-transform:uppercase}
+.role-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:22px 0 18px}
+.role-tab{text-align:center;padding:12px 6px;border:1px solid var(--line);border-radius:13px;cursor:pointer;background:var(--bg);transition:.2s;font-size:.78rem;font-weight:600}
+.role-tab svg.lucide{width:22px;height:22px;display:block;margin:0 auto 5px;color:var(--gold-deep)}
+.role-tab.active{border-color:var(--gold);background:rgba(242,183,5,.08);color:var(--gold-soft)}
+.role-tab.active svg.lucide{color:var(--gold)}
+.divider{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:.72rem;margin:18px 0;text-transform:uppercase;letter-spacing:.1em}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
+.gplay{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;border-radius:12px;border:1px dashed var(--line-gold);background:rgba(242,183,5,.04);color:var(--gold-soft);font-weight:600;font-size:.85rem;cursor:not-allowed;opacity:.85}
+.note{font-size:.74rem;color:var(--muted);margin-top:10px;text-align:center;line-height:1.5}
+.demo-box{margin-top:16px;font-size:.72rem;color:var(--muted);background:var(--bg);border:1px solid var(--line);border-radius:11px;padding:10px 12px}
+.demo-box b{color:var(--gold-soft)}
+.err{color:#ff8a73;font-size:.8rem;margin-top:8px;min-height:18px}
+#appView{position:relative;z-index:2}
+header.nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(10,6,8,.7);border-bottom:1px solid var(--line)}
+.nav-in{max-width:var(--maxw);margin:0 auto;display:flex;align-items:center;gap:12px;padding:12px 20px}
+.nav-logo{display:flex;align-items:center;gap:10px;font-family:var(--grok);font-weight:700}
+.nav-logo img{width:36px;height:36px;object-fit:contain}
+.nav-logo small{display:block;font-weight:400;font-size:.6rem;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)}
+.nav-spacer{flex:1}
+.role-badge{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;font-weight:700;padding:5px 12px;border-radius:999px;background:rgba(165,35,56,.25);color:var(--gold-soft);border:1px solid rgba(165,35,56,.4)}
+.who{font-size:.8rem;color:var(--muted)}
+.cloud-chip{display:inline-flex;align-items:center;gap:6px;font-size:.7rem;font-weight:700;padding:5px 11px;border-radius:999px;cursor:pointer;border:1px solid var(--line)}
+.cloud-chip.on{background:rgba(63,191,127,.16);color:#7ee2ab;border-color:rgba(63,191,127,.4)}
+.cloud-chip.off{background:rgba(255,255,255,.04);color:var(--muted)}
+main{max-width:var(--maxw);margin:0 auto;padding:26px 20px 40px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-deep)}
+h2.sec{font-family:var(--grok);font-size:clamp(24px,3.6vw,40px);font-weight:600;margin:8px 0 4px;letter-spacing:-.02em}
+.sub{color:var(--muted);font-size:.92rem;margin:0 0 22px}
+.cards-grid{display:grid;gap:16px}
+.grid-2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.grid-3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.grid-4{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.card{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+.card h3{font-family:var(--grok);font-weight:600;font-size:1.02rem;color:var(--gold-soft);margin:0 0 14px;display:flex;align-items:center;gap:9px}
+.stat{background:linear-gradient(160deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:18px;padding:18px 20px;position:relative}
+.stat .num{font-family:var(--grok);font-size:1.9rem;font-weight:700;color:var(--gold);line-height:1}
+.stat .lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-top:8px}
+.stat .num small{font-size:.9rem;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:.84rem}
+th,td{padding:10px 10px;text-align:left;border-bottom:1px solid var(--line)}
+thead th{background:rgba(165,35,56,.18);color:var(--gold-soft);font-size:.66rem;letter-spacing:1.1px;text-transform:uppercase;position:sticky;top:0}
+tbody tr:hover{background:rgba(255,255,255,.02)}
+.tbl-wrap{overflow:auto;border:1px solid var(--line);border-radius:16px;max-height:62vh}
+.rate{display:inline-block;padding:3px 9px;border-radius:999px;font-size:.7rem;font-weight:700;letter-spacing:.04em;white-space:nowrap}
+.r5{background:rgba(63,191,127,.18);color:#7ee2ab;border:1px solid rgba(63,191,127,.4)}
+.r4{background:rgba(242,183,5,.16);color:var(--gold-soft);border:1px solid var(--line-gold)}
+.r3{background:rgba(200,150,10,.16);color:#e6c558;border:1px solid rgba(200,150,10,.4)}
+.r2{background:rgba(224,86,63,.16);color:#ff9b85;border:1px solid rgba(224,86,63,.4)}
+.r1{background:rgba(165,35,56,.22);color:#ff8aa0;border:1px solid rgba(165,35,56,.45)}
+.r0{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--line)}
+.tabbar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 22px}
+.tab{padding:9px 15px;border-radius:11px;border:1px solid var(--line);background:var(--panel-2);cursor:pointer;font-weight:600;font-size:.84rem;display:inline-flex;align-items:center}
+.tab.active{background:linear-gradient(135deg,var(--maroon-bright),var(--maroon));color:#fff;border:none}
+.chart-box{position:relative;height:330px}
+.delta{font-weight:700;font-family:var(--grok);font-size:.9rem}
+.delta.up{color:var(--ok)}.delta.down{color:var(--bad)}.delta.flat{color:var(--muted)}
+.station{border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden;background:var(--bg)}
+.station-top{display:flex;align-items:center;gap:12px;padding:12px 14px;flex-wrap:wrap}
+.station-top .name{flex:1;min-width:180px}
+.station-top .name b{color:var(--gold-soft);font-weight:600}
+.station-top .name .cmp{font-size:.72rem;color:var(--muted)}
+.station-top .inp{width:120px}.station-top .inp input{padding:8px 10px}
+.station-top .rm{min-width:92px;text-align:center}
+.info-btn{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:8px;cursor:pointer;font-size:.74rem;padding:6px 9px;display:inline-flex;align-items:center;gap:5px}
+.info-btn:hover{color:var(--gold-soft);border-color:var(--line-gold)}
+.guide{padding:0 14px;max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s;font-size:.82rem;color:var(--muted);border-top:1px solid transparent}
+.guide.open{max-height:900px;padding:12px 14px 16px;border-top:1px solid var(--line)}
+.guide ol{margin:8px 0 10px;padding-left:18px}.guide li{margin-bottom:4px}
+.guide .tag{display:inline-block;font-size:.68rem;color:var(--gold-soft);background:rgba(242,183,5,.08);border:1px solid var(--line-gold);border-radius:999px;padding:2px 9px;margin:2px 6px 2px 0}
+table.matrix{width:auto;min-width:280px;margin-top:4px;font-size:.76rem;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+table.matrix th,table.matrix td{padding:5px 12px;border-bottom:1px solid var(--line)}
+table.matrix thead th{background:rgba(165,35,56,.16)}
+.stat-readout{font-size:.86rem;line-height:1.7}
+.stat-readout code{font-family:var(--grok);background:var(--bg);border:1px solid var(--line);padding:1px 7px;border-radius:6px;color:var(--gold-soft)}
+.sig{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:700;font-size:.72rem}
+.sig.yes{background:rgba(63,191,127,.18);color:#7ee2ab;border:1px solid rgba(63,191,127,.4)}
+.sig.no{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--line)}
+.modal-bg{position:fixed;inset:0;background:rgba(5,3,4,.7);backdrop-filter:blur(4px);z-index:100;display:grid;place-items:center;padding:20px}
+.modal{width:min(780px,100%);max-height:92vh;overflow:auto;background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line-gold);border-radius:var(--radius);padding:26px}
+.modal h3{font-family:var(--grok);margin:0 0 6px;font-size:1.2rem}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--panel-2);border:1px solid var(--line-gold);color:var(--text);padding:12px 20px;border-radius:12px;z-index:200;box-shadow:0 12px 30px rgba(0,0,0,.5);font-size:.86rem}
+.foot{text-align:center;color:var(--muted);font-size:.74rem;padding:30px 20px;border-top:1px solid var(--line);margin-top:30px}
+.badge-soon{font-size:.6rem;background:var(--maroon);color:var(--gold-soft);padding:2px 7px;border-radius:999px;letter-spacing:1px;text-transform:uppercase;font-weight:700}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.chip.done{background:rgba(63,191,127,.16);color:#7ee2ab;border:1px solid rgba(63,191,127,.4)}
+.chip.partial{background:rgba(242,183,5,.14);color:var(--gold-soft);border:1px solid var(--line-gold)}
+.chip.none{background:rgba(255,255,255,.04);color:var(--muted);border:1px solid var(--line)}
+.dropzone{border:1px dashed var(--line-gold);border-radius:14px;padding:24px;text-align:center;background:rgba(242,183,5,.03);cursor:pointer}
+.dropzone:hover{background:rgba(242,183,5,.06)}
+.iconbtn{border:1px solid var(--line);background:var(--panel-2);color:var(--text);border-radius:8px;padding:5px 8px;cursor:pointer;display:inline-flex;align-items:center}
+.iconbtn:hover{border-color:var(--line-gold);color:var(--gold-soft)}
+.iconbtn svg.lucide{width:15px;height:15px}
+@media print{.nav,.tabbar,.no-print,.bg-blobs,.info-btn{display:none!important}body{background:#fff;color:#111}.card{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="bg-blobs"><div class="blob b1"></div><div class="blob b2"></div></div>
+
+<!-- LOGIN -->
+<section id="loginView">
+  <div class="login-card">
+    <div class="login-brand">
+      <img src="https://jaycarlobagayas-netizen.github.io/bpedleptresearch/images/logo-bped.png" alt="BPED logo" onerror="this.outerHTML='&lt;div class=&quot;seal&quot;&gt;BPED&lt;/div&gt;'">
+      <div><h1 class="grok">PFT Analytics</h1><small>Physical Fitness Test · BPED MSU–GenSan</small></div>
+    </div>
+    <p class="muted" style="font-size:.86rem;margin:4px 0 0">Tabulate, analyze, and track pre- and post-test fitness performance.</p>
+    <div class="role-tabs" id="roleTabs">
+      <div class="role-tab active" data-role="student"><i data-lucide="graduation-cap"></i>Student</div>
+      <div class="role-tab" data-role="teacher"><i data-lucide="clipboard-check"></i>Teacher</div>
+      <div class="role-tab" data-role="managerial"><i data-lucide="shield"></i>Managerial</div>
+    </div>
+    <label class="fld"><span>Username</span><input id="liUser" autocomplete="username" placeholder="username"></label>
+    <label class="fld"><span>Password</span><input id="liPass" type="password" autocomplete="current-password" placeholder="••••••••"></label>
+    <div class="err" id="liErr"></div>
+    <button class="btn btn-gold" style="width:100%;padding:13px;justify-content:center" id="liBtn"><i data-lucide="log-in"></i> Sign in</button>
+    <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:8px;justify-content:center" id="signupToggle">New teacher / student? Create an account</button>
+    <div class="divider">licensed access</div>
+    <button class="gplay" title="Available soon on Google Play"><i data-lucide="play"></i> Get access on Google Play <span class="badge-soon">soon</span></button>
+    <p class="note">Full access will be granted to verified purchasers via the Google Play Store. This preview uses local demo accounts.</p>
+    <div class="demo-box"><b>Demo logins</b><br>Student — <b>student</b> / student123 &nbsp;·&nbsp; Teacher — <b>teacher</b> / teacher123 &nbsp;·&nbsp; Managerial — <b>admin</b> / bped2026</div>
+  </div>
+</section>
+
+<!-- APP -->
+<div id="appView" class="hidden">
+  <header class="nav"><div class="nav-in">
+    <div class="nav-logo"><img src="https://jaycarlobagayas-netizen.github.io/bpedleptresearch/images/logo-bped.png" alt="" onerror="this.style.display='none'"><div>PFT Analytics<small>BPED · MSU–GenSan</small></div></div>
+    <div class="nav-spacer"></div>
+    <span class="cloud-chip off" id="cloudChip"><i data-lucide="cloud-off"></i> Cloud: off</span>
+    <span class="who" id="navWho"></span>
+    <span class="role-badge" id="navRole"></span>
+    <button class="btn btn-sm" id="logoutBtn"><i data-lucide="log-out"></i> Log out</button>
+  </div></header>
+  <main id="appMain"></main>
+  <div class="foot">
+    BPED Physical Fitness Test Analytics · Patterned after the BPED LEPT Research portal · For Asst. Prof. Jay Carlo S. Bagayas, MSPE<br>
+    10-station PFT (pre/post) · Norms &amp; mechanics from the uploaded fitness-test manual · Connect Firebase for multi-device cloud sync.
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ============================================================ 1. INSTRUMENT ============================================================ */
+const STATIONS = [
+  {key:'beep',     no:1,  name:'Beep Test (20m MSFT)',     comp:'Cardiovascular Endurance', short:'Cardio',  unit:'level',        dir:'high'},
+  {key:'stork',    no:2,  name:'Stork Balance Stand',      comp:'Balance',                  short:'Balance', unit:'seconds',      dir:'high'},
+  {key:'situp',    no:3,  name:'Sit-Up (1 min)',           comp:'Abdominal Strength',       short:'Abs',     unit:'repetitions',  dir:'high'},
+  {key:'reach',    no:4,  name:'Sit & Reach',              comp:'Flexibility',              short:'Flex',    unit:'centimeters',  dir:'high'},
+  {key:'pushup',   no:5,  name:'Push-Up',                  comp:'Muscle Strength',          short:'Strength',unit:'repetitions',  dir:'high'},
+  {key:'illinois', no:6,  name:'Illinois Agility Test',    comp:'Agility',                  short:'Agility', unit:'seconds',      dir:'low'},
+  {key:'dash',     no:7,  name:'50-meter Dash',            comp:'Speed',                    short:'Speed',   unit:'seconds',      dir:'low'},
+  {key:'jump',     no:8,  name:'Sargent Vertical Jump',    comp:'Leg Power',                short:'Power',   unit:'centimeters',  dir:'high'},
+  {key:'wall',     no:9,  name:'Tennis Wall Toss (30s)',   comp:'Coordination',             short:'Coord',   unit:'catches',      dir:'high'},
+  {key:'nelson',   no:10, name:'Nelson Drop Test',         comp:'Reaction Time',            short:'Reaction',unit:'seconds',      dir:'low'},
+];
+const RATE_LABELS={5:'Very Good',4:'Good',3:'Average',2:'Poor',1:'Very Poor'};
+const ICON={beep:'heart-pulse',stork:'footprints',situp:'dumbbell',reach:'move-vertical',pushup:'dumbbell',illinois:'route',dash:'rabbit',jump:'move-up',wall:'circle-dot',nelson:'timer'};
+const SECTIONS=[
+  {label:'Mara Cuya - C120', teacher:'Mara L. Cuya'},
+  {label:'Mara Cuya - C112', teacher:'Mara L. Cuya'},
+  {label:'Jofranco Lozano - B239', teacher:'Jofranco G. Lozano'},
+  {label:'Mussar Salamat - S123', teacher:'Mussar A. Salamat'},
+];
+const GUIDE={
+  beep:{purpose:'Aerobic capacity (cardiovascular endurance).',equip:'20 m flat course, cones, beep-test audio, player.',steps:['Mark two lines 20 m apart.','Run line-to-line in time with the recorded beeps.','Each minute the beeps get faster (next level).','If you reach the line before the beep, wait for it.','A warning is given when you miss the line; eliminated on the 2nd miss.','Record the LAST level completed.']},
+  stork:{purpose:'Static balance on the ball of the foot.',equip:'Flat non-slip surface, stopwatch.',steps:['Remove shoes; place hands on hips.','Put the non-supporting foot against the inside of the supporting knee.','Raise the heel to balance on the ball of the foot — start the timer.','Stop if: hands leave hips, the foot hops/moves, the raised foot leaves the knee, or the heel touches the floor.','Record the BEST of three attempts (seconds).']},
+  situp:{purpose:'Abdominal muscular strength & endurance.',equip:'Mat / flat surface, stopwatch.',steps:['Lie supine, knees bent ~90°, feet flat on the floor.','Hands by the ears, elbows wide.','Curl up to a sitting position, then lower back down.','Keep feet on the floor; do NOT pull the head with the hands.','Count correct repetitions in 1 minute.']},
+  reach:{purpose:'Flexibility of the lower back & hamstrings.',equip:'Sit-and-reach box (or ruler on a step).',steps:['Sit with legs straight, shoes off, soles flat against the box.','Keep both knees locked and pressed flat.','Hands stacked, palms down — reach forward slowly as far as possible.','Hold 1–2 s; no jerky movements.','Record the farthest distance reached (cm).']},
+  pushup:{purpose:'Upper-body muscular strength.',equip:'Flat surface.',steps:['Hands slightly wider than the shoulders; body straight (men) or on knees — modified (women).','Brace the core; lower until the elbows reach ~90°.','Push back up without locking the elbows.','No sagging or arching of the back.','Count correct repetitions.']},
+  illinois:{purpose:'Running agility (change of direction).',equip:'10 m × 5 m area, 8 cones, stopwatch.',steps:['Lie face-down, head at the start line, hands by the shoulders.','On “Go”, get up and run the course around the cones as fast as possible.','Do not knock the cones over.','Record the time to finish (seconds — lower is better).']},
+  dash:{purpose:'Acceleration and running speed.',equip:'50 m marked track, stopwatch.',steps:['Start stationary, standing, one foot behind the line (no hands on the ground).','On “set… go”, sprint the full 50 m at maximum effort.','Do not slow down before the finish line.','Record the time (seconds — lower is better).']},
+  jump:{purpose:'Leg/explosive muscle power.',equip:'Marked wall, chalk.',steps:['Stand side-on to the wall; reach up and mark the standing-reach height.','Jump as high as possible using arms and legs; mark the peak.','Score = jump height − standing reach (cm).','Record the BEST of three attempts.']},
+  wall:{purpose:'Hand–eye coordination.',equip:'Tennis/baseball ball, smooth wall, tape, stopwatch.',steps:['Stand behind a line ~2 m from the wall.','Throw underarm with one hand; catch with the OTHER hand.','Alternate the throwing/catching hand each time.','Count successful catches in 30 seconds.']},
+  nelson:{purpose:'Reaction time / hand–eye quickness.',equip:'1 m ruler or yardstick.',steps:['Rest the forearm on a table with fingers over the edge.','Partner holds the ruler at the 0 mark between your fingers.','Catch the ruler as fast as possible when it drops (no warning).','Repeat ~10 times and average the drop distance.','Convert distance → time: t = √(2d ÷ g), g = 9.8 m/s². Record seconds (lower is better).']},
+};
+const DEFAULT_NORMS={
+  beep:{dir:'high',src:'manual',M:[13,11,9,7],F:[12,10,8,6]},
+  stork:{dir:'high',src:'manual',M:[50,40,25,10],F:[50,40,25,10]},
+  situp:{dir:'high',src:'manual',M:[50,39,35,25],F:[43,33,25,19]},
+  reach:{dir:'high',src:'manual',M:[25,23,20,17],F:[25,23,20,18]},
+  pushup:{dir:'high',src:'manual',M:[40,30,20,10],F:[40,30,20,10]},
+  illinois:{dir:'low',src:'manual',M:[15.9,16.7,17.6,18.8],F:[17.5,18.6,22.4,23.4]},
+  dash:{dir:'low',src:'default',M:[7.0,7.8,8.6,9.5],F:[8.0,8.8,9.6,10.5]},
+  jump:{dir:'high',src:'manual',M:[65,50,40,30],F:[58,47,36,26]},
+  wall:{dir:'high',src:'manual',M:[35,30,25,20],F:[35,30,25,20]},
+  nelson:{dir:'low',src:'default',M:[0.15,0.18,0.22,0.27],F:[0.15,0.18,0.22,0.27]},
+};
+function rate(key,value,gender){if(value===''||value==null||isNaN(value))return null;const n=DB.norms[key],g=(gender==='F'?'F':'M'),c=n[g],v=parseFloat(value);let p;if(n.dir==='high')p=v>=c[0]?5:v>=c[1]?4:v>=c[2]?3:v>=c[3]?2:1;else p=v<=c[0]?5:v<=c[1]?4:v<=c[2]?3:v<=c[3]?2:1;return{points:p,label:RATE_LABELS[p]};}
+function scoringMatrix(key){const n=DB.norms[key],op=n.dir==='high'?'≥':'≤',last=n.dir==='high'?'<':'>',idx={5:0,4:1,3:2,2:3};
+  const cell=(a,p)=>p===1?(last+' '+a[3]):(op+' '+a[idx[p]]);
+  let r='';[5,4,3,2,1].forEach(p=>{r+=`<tr><td><span class="${rcls(p)}">${RATE_LABELS[p]}</span></td><td>${cell(n.M,p)}</td><td>${cell(n.F,p)}</td></tr>`;});
+  return`<table class="matrix"><thead><tr><th>Remark</th><th>Male</th><th>Female</th></tr></thead><tbody>${r}</tbody></table>`;}
+function bmiOf(h,w){h=parseFloat(h);w=parseFloat(w);if(!h||!w)return null;return w/(h*h);}
+function bmiClass(b){if(b==null)return'';if(b<18.5)return'Underweight';if(b<25)return'Normal';if(b<30)return'Overweight';return'Obese';}
+function karvonen(age,rhr){age=parseFloat(age);rhr=parseFloat(rhr);if(!age)return null;const mhr=220-age,hrr=rhr?mhr-rhr:null,z=p=>hrr!=null?Math.round(hrr*p+rhr):null;return{mhr,hrr,zones:{z60:[z(.6),z(.7)],z70:[z(.7),z(.8)],z80:[z(.8),z(.9)],z90:[z(.9),z(1)]}};}
+function phaseSummary(rec,phase){const sc=(rec.scores&&rec.scores[phase])||{};const pts={};let sum=0,cnt=0;STATIONS.forEach(s=>{const r=rate(s.key,sc[s.key],rec.gender);if(r){pts[s.key]=r.points;sum+=r.points;cnt++;}});return{pts,avg:cnt?sum/cnt:0,pct:cnt?Math.round(sum/cnt/5*100):0,rating:cnt?RATE_LABELS[Math.round(sum/cnt)]:'—',filled:cnt};}
+function phaseStatus(rec,phase){const f=phaseSummary(rec,phase).filled;return f===0?'none':f>=STATIONS.length?'done':'partial';}
+
+/* ============================================================ 2. STATISTICS ============================================================ */
+function mean(a){return a.reduce((x,y)=>x+y,0)/a.length;}
+function sd(a){if(a.length<2)return 0;const m=mean(a);return Math.sqrt(a.reduce((s,x)=>s+(x-m)*(x-m),0)/(a.length-1));}
+function logGamma(x){const c=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5];let y=x,t=x+5.5;t-=(x+0.5)*Math.log(t);let s=1.000000000190015;for(let j=0;j<6;j++){y++;s+=c[j]/y;}return -t+Math.log(2.5066282746310005*s/x);}
+function betacf(a,b,x){const FP=1e-300;let qab=a+b,qap=a+1,qam=a-1,c=1,d=1-qab*x/qap;if(Math.abs(d)<FP)d=FP;d=1/d;let h=d;for(let m=1;m<=200;m++){let m2=2*m,aa=m*(b-m)*x/((qam+m2)*(a+m2));d=1+aa*d;if(Math.abs(d)<FP)d=FP;c=1+aa/c;if(Math.abs(c)<FP)c=FP;d=1/d;h*=d*c;aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));d=1+aa*d;if(Math.abs(d)<FP)d=FP;c=1+aa/c;if(Math.abs(c)<FP)c=FP;d=1/d;let del=d*c;h*=del;if(Math.abs(del-1)<3e-12)break;}return h;}
+function betai(a,b,x){if(x<=0)return 0;if(x>=1)return 1;const bt=Math.exp(logGamma(a+b)-logGamma(a)-logGamma(b)+a*Math.log(x)+b*Math.log(1-x));return x<(a+1)/(a+b+2)?bt*betacf(a,b,x)/a:1-bt*betacf(b,a,1-x)/b;}
+function tTwoTailedP(t,df){if(df<=0)return NaN;return betai(df/2,0.5,df/(df+t*t));}
+function pairedT(pre,post){const d=[];for(let i=0;i<pre.length;i++)if(pre[i]!=null&&post[i]!=null)d.push(post[i]-pre[i]);const n=d.length;if(n<2)return{n,insufficient:true};const md=mean(d),sdd=sd(d),se=sdd/Math.sqrt(n),t=se===0?(md===0?0:Infinity):md/se,df=n-1,p=isFinite(t)?tTwoTailedP(t,df):0,cohend=sdd===0?(md===0?0:Infinity):md/sdd;return{n,md,sdd,se,t,df,p,cohend,insufficient:false};}
+function fmtP(p){if(p==null||isNaN(p))return'—';if(p<0.001)return'p < .001';return'p = '+p.toFixed(3).replace(/^0\./,'.');}
+function effSize(d){d=Math.abs(d);if(!isFinite(d))return'very large';if(d<0.2)return'negligible';if(d<0.5)return'small';if(d<0.8)return'medium';return'large';}
+function statBlock(res,unitLabel){if(res.insufficient)return`<p class="muted">Not enough paired data for a statistical test (need ≥ 2 paired observations).</p>`;const sig=res.p<0.05,dir=res.md>0?'increase':res.md<0?'decrease':'no change';return`<div class="stat-readout"><p>Paired-samples t-test (${unitLabel}, n = ${res.n}): mean change <code>M = ${res.md>=0?'+':''}${res.md.toFixed(2)}</code>, <code>SD = ${res.sdd.toFixed(2)}</code>, <code>t(${res.df}) = ${isFinite(res.t)?res.t.toFixed(2):'∞'}</code>, <code>${fmtP(res.p)}</code>, Cohen's <code>d = ${isFinite(res.cohend)?res.cohend.toFixed(2):'∞'}</code>.</p><p>Result: <span class="sig ${sig?'yes':'no'}">${sig?'Statistically significant':'Not significant'}</span> at α = .05 — a ${effSize(res.cohend)} ${dir}. ${sig?`The post-test ${dir} is unlikely to be due to chance.`:`The observed ${dir} could plausibly be due to chance.`}</p></div>`;}
+
+/* ============================================================ 3. DATA STORE ============================================================ */
+const KEY='bped_pft_v3';
+let DB=load();
+function load(){try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r);}catch(e){}return seed();}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){}cloudSave();}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function seed(){
+  const db={norms:JSON.parse(JSON.stringify(DEFAULT_NORMS)),users:[],students:[]};
+  db.users.push({id:'u_admin',name:'Asst. Prof. Jay Carlo S. Bagayas',email:'bped@msugensan.edu.ph',username:'admin',pass:'bped2026',role:'managerial'});
+  db.users.push({id:'u_mcuya',name:'Mara L. Cuya',email:'mcuya@msugensan.edu.ph',username:'teacher',pass:'teacher123',role:'teacher',sections:['Mara Cuya - C120','Mara Cuya - C112']});
+  db.users.push({id:'u_jloz',name:'Jofranco G. Lozano',email:'jlozano@msugensan.edu.ph',username:'jlozano',pass:'teacher123',role:'teacher',sections:['Jofranco Lozano - B239']});
+  db.users.push({id:'u_msal',name:'Mussar A. Salamat',email:'msalamat@msugensan.edu.ph',username:'msalamat',pass:'teacher123',role:'teacher',sections:['Mussar Salamat - S123']});
+  db.users.push({id:'u_stud',name:'Juan Dela Cruz',email:'juan@student.msugensan.edu.ph',username:'student',pass:'student123',role:'student'});
+  const ppl=[
+    ['Juan Dela Cruz','M',19,'juan@student.msugensan.edu.ph','Mara Cuya - C120'],
+    ['Maria Santos','F',18,'maria@student.msugensan.edu.ph','Mara Cuya - C120'],
+    ['Pedro Reyes','M',20,'pedro@student.msugensan.edu.ph','Mara Cuya - C120'],
+    ['Andrea Lim','F',19,'andrea@student.msugensan.edu.ph','Mara Cuya - C120'],
+    ['Mark Villamor','M',18,'mark@student.msugensan.edu.ph','Mara Cuya - C112'],
+    ['Bea Tolentino','F',20,'bea@student.msugensan.edu.ph','Mara Cuya - C112'],
+    ['Carlo Aquino','M',19,'carlo@student.msugensan.edu.ph','Jofranco Lozano - B239'],
+    ['Liza Bautista','F',18,'liza@student.msugensan.edu.ph','Jofranco Lozano - B239'],
+    ['Noel Cruz','M',21,'noel@student.msugensan.edu.ph','Mussar Salamat - S123'],
+  ];
+  const malePre=[9,38,40,21,28,17.4,8.2,52,28,0.24],femPre=[8,42,34,22,26,19.0,9.1,44,27,0.25];
+  const impM=[2,8,8,3,7,0.9,0.6,9,5,0.04],impF=[2,7,6,3,6,1.0,0.7,8,4,0.04];
+  ppl.forEach((P,idx)=>{const g=P[1],base=g==='M'?malePre:femPre,imp=g==='M'?impM:impF;
+    const jit=base.map(v=>+(v+(Math.random()*2-1)*v*0.06).toFixed(2));
+    const post=jit.map((v,i)=>+(v+(STATIONS[i].dir==='low'?-imp[i]:imp[i])).toFixed(2));
+    const pre={},po={};STATIONS.forEach((s,i)=>{pre[s.key]=jit[i];po[s.key]=post[i];});
+    const teacher=(SECTIONS.find(s=>s.label===P[4])||{}).teacher;
+    const tid=({'Mara L. Cuya':'u_mcuya','Jofranco G. Lozano':'u_jloz','Mussar A. Salamat':'u_msal'})[teacher]||'u_mcuya';
+    const rec={id:idx===0?'s_demo':uid(),name:P[0],email:P[3],gender:g,age:P[2],heightM:g==='M'?1.68:1.58,weightKg:g==='M'?62:52,section:P[4],createdBy:tid,hr:{pre:{rhr:78,epr:150,rec:110},post:{rhr:72,epr:140,rec:100}},scores:{pre,post:po}};
+    if(idx===1)rec.intervention={name:'HIIT_Program_Maria.txt',date:new Date().toISOString().slice(0,10),dataUrl:'data:text/plain;base64,'+btoa('Sample Intervention Program\n6-week HIIT, 3x/week.\nWeek1-2: 20s work/40s rest x8.\nWeek3-4: 30s/30s x10.\nWeek5-6: 40s/20s x12.\nFocus: cardiovascular endurance & leg power.')};
+    db.students.push(rec);});
+  return db;
+}
+
+/* ============================================================ 4. CLOUD (Firebase, optional) ============================================================ */
+const FB_KEY='pft_fbconfig';
+let cloud={on:false,db:null,storage:null,lastTs:0};
+function getFBConfig(){try{const r=localStorage.getItem(FB_KEY);if(r){const c=JSON.parse(r);if(c&&c.apiKey&&c.projectId)return c;}}catch(e){}return null;}
+function initCloud(){const cfg=getFBConfig();if(!cfg||typeof firebase==='undefined')return;try{if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(cfg);cloud.db=firebase.firestore();try{cloud.storage=firebase.storage();}catch(e){}cloud.on=true;updateCloudChip();
+  cloud.db.collection('pft').doc('state').onSnapshot(snap=>{const d=snap.data();if(d&&d.data&&d.ts&&d.ts!==cloud.lastTs){DB=d.data;cloud.lastTs=d.ts;try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){}rerender();}},err=>console.warn('cloud snap',err));
+}catch(e){console.warn('cloud init failed',e);}}
+function cloudSave(){if(!cloud.on||!cloud.db)return;cloud.lastTs=Date.now();cloud.db.collection('pft').doc('state').set({data:DB,ts:cloud.lastTs}).catch(e=>console.warn('cloud save',e));}
+function updateCloudChip(){const c=el('cloudChip');if(!c)return;if(cloud.on){c.className='cloud-chip on';c.innerHTML='<i data-lucide="cloud"></i> Cloud: synced';}else{c.className='cloud-chip off';c.innerHTML='<i data-lucide="cloud-off"></i> Cloud: off';}icons();}
+function openCloudModal(){
+  const cfg=getFBConfig()||{};const isMgr=SESSION&&SESSION.role==='managerial';
+  modal(`<h3 class="grok"><i data-lucide="cloud"></i> Cloud sync (Firebase)</h3>
+  <p class="sub">${cloud.on?'Connected — data syncs in real time across devices via Firestore.':'Currently using this browser only. Paste your Firebase web-app config to enable multi-device sync and cloud file storage.'}</p>
+  ${isMgr?`<label class="fld"><span>Firebase config (JSON from your Firebase console → Project settings → Web app)</span>
+  <textarea id="fbCfg" rows="9" style="width:100%;font-family:var(--grok);font-size:.8rem;background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:11px;padding:10px">${cfg.apiKey?esc(JSON.stringify(cfg,null,2)):'{\n  "apiKey": "",\n  "authDomain": "your-project.firebaseapp.com",\n  "projectId": "your-project",\n  "storageBucket": "your-project.appspot.com",\n  "messagingSenderId": "",\n  "appId": ""\n}'}</textarea></label>
+  <div class="err" id="fbErr"></div>
+  <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" data-close>Close</button>${cfg.apiKey?'<button class="btn btn-maroon" id="fbClear">Disconnect</button>':''}<button class="btn btn-gold" id="fbSave"><i data-lucide="cloud"></i> Connect &amp; reload</button></div>`
+  :`<p class="muted">Ask the managerial administrator to configure cloud sync.</p><div style="display:flex;justify-content:flex-end"><button class="btn" data-close>Close</button></div>`}`);
+  icons();
+  if(isMgr){
+    const sb=el('fbSave');if(sb)sb.onclick=()=>{try{const c=JSON.parse(el('fbCfg').value);if(!c.apiKey||!c.projectId)throw 0;localStorage.setItem(FB_KEY,JSON.stringify(c));toast('Saved — reloading');setTimeout(()=>location.reload(),500);}catch(e){el('fbErr').textContent='Invalid config — paste the JSON object from Firebase.';}};
+    const cl=el('fbClear');if(cl)cl.onclick=()=>{localStorage.removeItem(FB_KEY);toast('Disconnected — reloading');setTimeout(()=>location.reload(),500);};
+  }
+}
+
+/* ============================================================ 5. AUTH ============================================================ */
+let SESSION=null,loginRole='student';
+el('roleTabs').addEventListener('click',e=>{const t=e.target.closest('.role-tab');if(!t)return;document.querySelectorAll('.role-tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');loginRole=t.dataset.role;el('liErr').textContent='';});
+el('liBtn').addEventListener('click',doLogin);
+el('liPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+el('signupToggle').addEventListener('click',openSignup);
+el('logoutBtn').addEventListener('click',logout);
+el('cloudChip').addEventListener('click',openCloudModal);
+function doLogin(){const u=val('liUser'),p=el('liPass').value,err=el('liErr');const user=DB.users.find(x=>x.username.toLowerCase()===u.toLowerCase()&&x.pass===p);if(!user){err.textContent='Invalid username or password.';return;}if(user.role!==loginRole){err.textContent='This is a '+user.role+' account — switch the tab above.';return;}SESSION=user;err.textContent='';enterApp();}
+function logout(){SESSION=null;el('appView').classList.add('hidden');el('loginView').classList.remove('hidden');el('liPass').value='';icons();}
+function openSignup(){
+  modal(`<h3 class="grok"><i data-lucide="user-plus"></i> Create an account</h3><p class="sub">Teachers and students can self-register in this preview. Managerial access is restricted.</p>
+  <div class="row">
+    <label class="fld"><span>Full name</span><input id="suName"></label>
+    <label class="fld"><span>Role</span><select id="suRole"><option value="student">Student</option><option value="teacher">Teacher</option></select></label>
+    <label class="fld"><span>Email</span><input id="suEmail" placeholder="name@student.edu"></label>
+    <label class="fld"><span>Username</span><input id="suUser"></label>
+    <label class="fld"><span>Password</span><input id="suPass" type="password"></label>
+    <label class="fld" id="suSecStud"><span>Section (permanent once created)</span><select id="suSecSel">${SECTIONS.map(s=>`<option value="${esc(s.label)}">${esc(s.label)}</option>`).join('')}</select></label>
+    <label class="fld hidden" id="suSecTeach"><span>Section you handle</span><input id="suSecInp" placeholder="e.g. BSED-PE 1B"></label>
+  </div><div class="err" id="suErr"></div>
+  <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" data-close>Cancel</button><button class="btn btn-gold" id="suBtn">Create account</button></div>`);
+  icons();
+  el('suRole').onchange=function(){const stud=this.value==='student';el('suSecStud').classList.toggle('hidden',!stud);el('suSecTeach').classList.toggle('hidden',stud);};
+  el('suBtn').onclick=()=>{
+    const name=val('suName'),role=val('suRole'),email=val('suEmail').toLowerCase(),user=val('suUser'),pass=val('suPass'),err=el('suErr');
+    if(!name||!user||!pass||!email){err.textContent='Name, email, username and password are required.';return;}
+    if(DB.users.some(x=>x.username.toLowerCase()===user.toLowerCase())){err.textContent='Username already taken.';return;}
+    const nu={id:uid(),name,email,username:user,pass,role};
+    if(role==='teacher'){nu.sections=[val('suSecInp')||'Unassigned'];}
+    else{ // student: lock section now
+      const chosen=val('suSecSel');
+      let recExisting=DB.students.find(s=>s.email&&s.email.toLowerCase()===email);
+      if(!recExisting){DB.students.push({id:uid(),name,email,gender:'M',age:'',heightM:'',weightKg:'',section:chosen,createdBy:'self',hr:{pre:{},post:{}},scores:{pre:{},post:{}}});}
+      else if(!recExisting.section||recExisting.section==='Unassigned'){recExisting.section=chosen;}
+    }
+    DB.users.push(nu);save();closeModal();
+    el('liUser').value=user;el('liPass').value=pass;
+    document.querySelectorAll('.role-tab').forEach(x=>x.classList.toggle('active',x.dataset.role===role));loginRole=role;
+    toast('Account created — signing you in…');setTimeout(doLogin,300);
+  };
+}
+function enterApp(){el('loginView').classList.add('hidden');el('appView').classList.remove('hidden');el('navWho').textContent=SESSION.name;el('navRole').textContent=SESSION.role;updateCloudChip();try{window.scrollTo(0,0);}catch(e){}rerender();}
+function rerender(){if(!SESSION)return;if(SESSION.role==='student')renderStudent();else if(SESSION.role==='teacher')renderTeacher();else renderManagerial();}
+
+/* ============================================================ 6. HELPERS ============================================================ */
+function val(id){return el(id).value.trim();}
+function el(id){return document.getElementById(id);}
+function esc(s){return(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function rcls(p){return'rate r'+(p||0);}
+function ic(n){return`<i data-lucide="${n}"></i>`;}
+function icons(){if(typeof lucide!=='undefined'){try{lucide.createIcons();}catch(e){}}}
+function stat(num,lbl,icon){return`<div class="stat">${icon?`<span class="ico">${ic(icon)}</span>`:''}<div class="num grok">${num}</div><div class="lbl">${lbl}</div></div>`;}
+function modal(html){closeModal();const d=document.createElement('div');d.className='modal-bg';d.id='modalBg';d.innerHTML='<div class="modal">'+html+'</div>';d.addEventListener('mousedown',e=>{if(e.target===d)closeModal();});document.body.appendChild(d);d.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeModal);icons();}
+function closeModal(){const m=el('modalBg');if(m)m.remove();}
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2200);}
+let CHARTS=[];function clearCharts(){CHARTS.forEach(c=>{try{c.destroy();}catch(e){}});CHARTS=[];}
+function radarChart(cv,pre,post){if(typeof Chart==='undefined'||!cv)return;const labels=STATIONS.map(s=>s.short);const ds=[{label:'Pre-test',data:STATIONS.map(s=>pre&&pre[s.key]!=null?pre[s.key]:0),fill:true,backgroundColor:'rgba(165,35,56,.22)',borderColor:'#a52338',pointBackgroundColor:'#a52338',borderWidth:2}];if(post)ds.push({label:'Post-test',data:STATIONS.map(s=>post[s.key]!=null?post[s.key]:0),fill:true,backgroundColor:'rgba(242,183,5,.18)',borderColor:'#f2b705',pointBackgroundColor:'#ffd95e',borderWidth:2});CHARTS.push(new Chart(cv,{type:'radar',data:{labels,datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#f6efe6',font:{family:"'Space Grotesk'"}}}},scales:{r:{min:0,max:5,ticks:{stepSize:1,color:'#80706a',backdropColor:'transparent'},grid:{color:'rgba(255,255,255,.08)'},angleLines:{color:'rgba(255,255,255,.08)'},pointLabels:{color:'#f6efe6',font:{size:11,family:"'Space Grotesk'"}}}}}}));}
+function barChart(cv,labels,data){if(typeof Chart==='undefined'||!cv)return;const colors=data.map(v=>v>0?'#3fbf7f':v<0?'#e0563f':'#80706a');CHARTS.push(new Chart(cv,{type:'bar',data:{labels,datasets:[{data,backgroundColor:colors,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#b3a39c',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#80706a',stepSize:1},grid:{color:'rgba(255,255,255,.06)'}}}}}));}
+function statusChip(st,n){const map={done:['done','check-check','Complete'],partial:['partial','loader','Partial '+n+'/'+STATIONS.length],none:['none','minus','Not started']};const[c,i,t]=map[st];return`<span class="chip ${c}">${ic(i)} ${t}</span>`;}
+function unitAbbr(s){return({level:'lvl',seconds:'s',repetitions:'reps',centimeters:'cm',catches:'catches'})[s.unit]||'';}
+
+/* ============================================================ 7. STUDENT ============================================================ */
+let studTab='dash';
+function getStudentRecord(){let r=DB.students.find(s=>s.email&&SESSION.email&&s.email.toLowerCase()===SESSION.email.toLowerCase());if(!r){r={id:uid(),name:SESSION.name,email:SESSION.email||'',gender:'M',age:'',heightM:'',weightKg:'',section:'Unassigned',createdBy:SESSION.id,hr:{pre:{},post:{}},scores:{pre:{},post:{}}};DB.students.push(r);save();}return r;}
+function renderStudent(){
+  clearCharts();const rec=getStudentRecord();const assigned=rec.section&&rec.section!=='Unassigned';
+  el('appMain').innerHTML=`
+    <div class="eyebrow">My Performance</div><h2 class="sec">Hello, ${esc(rec.name)}</h2>
+    <p class="sub">Section: <b class="gold">${esc(rec.section||'Unassigned')}</b> ${assigned?'· assigned &amp; permanent — only your teacher can change it':'· <span class="muted">ask your teacher to add you, or it is set at sign-up</span>'} · ${rec.gender==='F'?'Female':'Male'} · Age ${rec.age||'—'}</p>
+    <div class="tabbar">
+      <div class="tab ${studTab==='dash'?'active':''}" data-st="dash">${ic('layout-dashboard')}Dashboard</div>
+      <div class="tab ${studTab==='pre'?'active':''}" data-st="pre">${ic('clipboard-pen')}Pre-test</div>
+      <div class="tab ${studTab==='post'?'active':''}" data-st="post">${ic('clipboard-check')}Post-test</div>
+      <div class="tab ${studTab==='interv'?'active':''}" data-st="interv">${ic('upload')}Intervention</div>
+      <div class="tab ${studTab==='results'?'active':''}" data-st="results">${ic('trending-up')}Results</div>
+      <div class="tab ${studTab==='guide'?'active':''}" data-st="guide">${ic('book-open')}Test Guide</div>
+    </div><div id="studBody"></div>`;
+  document.querySelectorAll('[data-st]').forEach(t=>t.onclick=()=>{studTab=t.dataset.st;renderStudent();});
+  ({dash:()=>studDash(rec),pre:()=>studPhase(rec,'pre'),post:()=>studPhase(rec,'post'),interv:()=>studInterv(rec),results:()=>studResults(rec),guide:studGuide}[studTab])();
+  icons();
+}
+function studDash(rec){
+  const pre=phaseSummary(rec,'pre'),post=phaseSummary(rec,'post'),bmi=bmiOf(rec.heightM,rec.weightKg);
+  el('studBody').innerHTML=`
+    <div class="cards-grid grid-4" style="margin-bottom:18px">
+      ${stat(pre.pct+'<small>%</small>','Pre-test','clipboard-pen')}
+      ${stat(post.pct+'<small>%</small>','Post-test','clipboard-check')}
+      ${stat((post.filled&&pre.filled?(post.pct-pre.pct>=0?'+':'')+(post.pct-pre.pct):'—')+'<small>%</small>','Change','trending-up')}
+      ${stat(bmi?bmi.toFixed(1):'—','BMI'+(bmi?' · '+bmiClass(bmi):''),'scale')}
+    </div>
+    <div class="cards-grid grid-2">
+      <div class="card"><h3>${ic('radar')} Fitness profile</h3><div class="chart-box"><canvas id="cRadar"></canvas></div><p class="muted" style="font-size:.74rem;margin-top:8px">Rating scale 1 (Very Poor) → 5 (Very Good) per component.</p></div>
+      <div class="card"><h3>${ic('list-checks')} Completion</h3>
+        <p style="margin:.2rem 0">Pre-test: ${statusChip(phaseStatus(rec,'pre'),pre.filled)} &nbsp; Post-test: ${statusChip(phaseStatus(rec,'post'),post.filled)}</p>
+        <p style="margin:.4rem 0">Intervention: ${rec.intervention?`<span class="chip done">${ic('paperclip')} Submitted</span>`:`<span class="chip none">${ic('minus')} None</span>`}</p>
+        <p class="muted" style="font-size:.85rem;margin-top:10px">Enter raw scores under <b>Pre-test</b> / <b>Post-test</b> — each station shows how to perform it and its scoring matrix, and converts your score to a remark instantly. Upload your training plan under <b>Intervention</b>, then view your three results under <b>Results</b>.</p>
+      </div>
+    </div>`;
+  radarChart(el('cRadar'),pre.pts,post.filled?post.pts:null);
+}
+function studPhase(rec,phase){
+  const sc=(rec.scores&&rec.scores[phase])||{},hr=(rec.hr&&rec.hr[phase])||{};
+  let rows='';
+  STATIONS.forEach(s=>{const v=sc[s.key]!=null?sc[s.key]:'',r=rate(s.key,v,rec.gender);
+    rows+=`<div class="station"><div class="station-top">
+      <div class="name"><b>${ic(ICON[s.key])} ${s.no}. ${s.name}</b><div class="cmp">${s.comp} · unit: ${s.unit}${s.dir==='low'?' (lower is better)':''}</div></div>
+      <button class="info-btn" data-guide="${s.key}">${ic('info')} How to perform</button>
+      <div class="inp"><input type="number" step="0.01" data-k="${s.key}" value="${v}" placeholder="${s.unit}"></div>
+      <div class="rm" id="rm_${s.key}">${r?`<span class="${rcls(r.points)}">${r.label}</span>`:'<span class="rate r0">—</span>'}</div>
+    </div><div class="guide" id="g_${s.key}"></div></div>`;});
+  el('studBody').innerHTML=`
+    <div class="card" style="margin-bottom:16px"><h3>${ic('user')} Profile</h3>
+      <div class="row">
+        <label class="fld"><span>Name</span><input id="pfName" value="${esc(rec.name||'')}"></label>
+        <label class="fld"><span>Gender</span><select id="pfGender"><option value="M"${rec.gender!=='F'?' selected':''}>Male</option><option value="F"${rec.gender==='F'?' selected':''}>Female</option></select></label>
+        <label class="fld"><span>Age</span><input id="pfAge" type="number" value="${rec.age||''}"></label>
+        <label class="fld"><span>Height (m)</span><input id="pfH" type="number" step="0.01" value="${rec.heightM||''}"></label>
+        <label class="fld"><span>Weight (kg)</span><input id="pfW" type="number" step="0.1" value="${rec.weightKg||''}"></label>
+        <label class="fld"><span>Section (locked)</span><input value="${esc(rec.section||'Unassigned')}" readonly title="Set by your teacher / at sign-up — cannot be changed"></label>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px"><h3>${ic(phase==='pre'?'clipboard-pen':'clipboard-check')} ${phase==='pre'?'PRE-TEST':'POST-TEST'} scorecard <span class="badge-soon" style="background:var(--maroon-deep)">${phase}</span></h3>
+      <p class="sub" style="margin-bottom:14px">Type each raw score — the remark transmutes automatically using the official PFT norms. Tap “How to perform” for instructions and the scoring matrix.</p>${rows}</div>
+    <div class="card" style="margin-bottom:16px"><h3>${ic('heart-pulse')} Heart rate &amp; target zones — ${phase}</h3>
+      <div class="row" style="margin-bottom:6px">
+        <label class="fld"><span>Resting HR (bpm)</span><input id="hrR" type="number" value="${hr.rhr!=null?hr.rhr:''}"></label>
+        <label class="fld"><span>Exercise HR (bpm)</span><input id="hrE" type="number" value="${hr.epr!=null?hr.epr:''}"></label>
+        <label class="fld"><span>Recovery HR (3 min)</span><input id="hrC" type="number" value="${hr.rec!=null?hr.rec:''}"></label>
+      </div><div id="hrOut" class="muted" style="font-size:.84rem"></div></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-gold" id="savePhase">${ic('save')} Save ${phase}-test</button>
+      <button class="btn" id="gotoResults">${ic('trending-up')} View results</button>
+    </div>`;
+  icons();
+  document.querySelectorAll('[data-guide]').forEach(b=>b.onclick=()=>{const key=b.dataset.guide,g=el('g_'+key);if(g.classList.contains('open')){g.classList.remove('open');return;}if(!g.innerHTML){const G=GUIDE[key];g.innerHTML=`<span class="tag">Purpose: ${G.purpose}</span><span class="tag">Equipment: ${G.equip}</span><ol>${G.steps.map(x=>`<li>${x}</li>`).join('')}</ol><div style="font-weight:600;color:var(--gold-soft);font-size:.74rem;text-transform:uppercase;letter-spacing:.08em;margin:6px 0 2px">Scoring matrix (${STATIONS.find(s=>s.key===key).unit})</div>${scoringMatrix(key)}`;}g.classList.add('open');});
+  const gsel=el('pfGender');
+  function setRem(inp){const r=rate(inp.dataset.k,inp.value,gsel.value);el('rm_'+inp.dataset.k).innerHTML=r?`<span class="${rcls(r.points)}">${r.label}</span>`:'<span class="rate r0">—</span>';}
+  document.querySelectorAll('#studBody input[data-k]').forEach(inp=>inp.addEventListener('input',()=>setRem(inp)));
+  gsel.addEventListener('change',()=>document.querySelectorAll('#studBody input[data-k]').forEach(setRem));
+  function refreshHR(){const k=karvonen(val('pfAge'),el('hrR').value);el('hrOut').innerHTML=k?`MHR <b class="gold">${k.mhr}</b> bpm · HRR <b class="gold">${k.hrr!=null?k.hrr:'—'}</b> bpm${k.hrr!=null?` — THR: Low <b>${k.zones.z60[0]}–${k.zones.z60[1]}</b> · Moderate <b>${k.zones.z70[0]}–${k.zones.z70[1]}</b> · High <b>${k.zones.z80[0]}–${k.zones.z80[1]}</b> · Very High <b>${k.zones.z90[0]}–${k.zones.z90[1]}</b> bpm`:' — enter resting HR for zones.'}`:'Enter age + resting HR for target zones.';}
+  el('hrR').addEventListener('input',refreshHR);el('pfAge').addEventListener('input',refreshHR);refreshHR();
+  el('savePhase').onclick=()=>{rec.name=val('pfName')||rec.name;rec.gender=val('pfGender');rec.age=val('pfAge');rec.heightM=val('pfH');rec.weightKg=val('pfW');rec.scores=rec.scores||{};rec.scores[phase]=rec.scores[phase]||{};document.querySelectorAll('#studBody input[data-k]').forEach(inp=>{if(inp.value==='')delete rec.scores[phase][inp.dataset.k];else rec.scores[phase][inp.dataset.k]=parseFloat(inp.value);});rec.hr=rec.hr||{};rec.hr[phase]={rhr:el('hrR').value,epr:el('hrE').value,rec:el('hrC').value};save();toast(phase+'-test saved');};
+  el('gotoResults').onclick=()=>{studTab='results';renderStudent();};
+}
+function studInterv(rec){
+  const iv=rec.intervention;
+  el('studBody').innerHTML=`<div class="card"><h3>${ic('upload')} Intervention program</h3>
+    <p class="sub">Upload your training / intervention program (PDF, image, or document). Your teacher and the administrator can review it.</p>
+    ${iv?`<div style="display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:14px">
+      ${ic('file-text')}<div style="flex:1"><b>${esc(iv.name)}</b><div class="muted" style="font-size:.76rem">Uploaded ${esc(iv.date||'')}</div></div>
+      <button class="iconbtn" id="ivView" title="View">${ic('eye')}</button>
+      <button class="iconbtn" id="ivDel" title="Remove">${ic('trash-2')}</button></div>`:''}
+    <div class="dropzone" id="ivZone">${ic('cloud-upload')}<div style="margin-top:6px;font-weight:600">${iv?'Replace file':'Click to choose a file'}</div><div class="muted" style="font-size:.76rem">Cloud storage used when Firebase is connected; otherwise stored locally (≤ 2 MB).</div></div>
+    <input type="file" id="ivFile" class="hidden" accept=".pdf,.doc,.docx,image/*,.txt">
+    <div class="err" id="ivErr"></div></div>`;
+  icons();
+  el('ivZone').onclick=()=>el('ivFile').click();
+  if(iv){el('ivView').onclick=()=>viewIntervention(rec);el('ivDel').onclick=()=>{if(confirm('Remove your uploaded intervention?')){delete rec.intervention;save();renderStudent();}};}
+  el('ivFile').onchange=function(){const f=this.files[0];if(!f)return;uploadIntervention(rec,f,el('ivErr'));};
+}
+function uploadIntervention(rec,file,errEl){
+  const meta={name:file.name,date:new Date().toISOString().slice(0,10),size:file.size};
+  if(cloud.on&&cloud.storage){const ref=cloud.storage.ref('interventions/'+rec.id+'_'+file.name);toast('Uploading to cloud…');ref.put(file).then(()=>ref.getDownloadURL()).then(url=>{meta.url=url;rec.intervention=meta;save();toast('Uploaded to cloud');renderStudent();}).catch(e=>{if(errEl)errEl.textContent='Cloud upload failed: '+e.message;});return;}
+  if(file.size>2*1024*1024){if(errEl)errEl.textContent='File is larger than 2 MB. Connect Firebase for large-file cloud storage.';return;}
+  const r=new FileReader();r.onload=()=>{meta.dataUrl=r.result;rec.intervention=meta;save();toast('Intervention saved');renderStudent();};r.readAsDataURL(file);
+}
+function viewIntervention(rec){const iv=rec.intervention;if(!iv){toast('No intervention submitted');return;}const src=iv.url||iv.dataUrl;if(!src){toast('File unavailable');return;}const w=window.open();if(w){if(iv.url){w.location=iv.url;}else{w.document.write(`<iframe src="${iv.dataUrl}" style="border:0;width:100%;height:100vh"></iframe>`);}}else toast('Allow pop-ups to view the file');}
+function studResults(rec){
+  const pre=phaseSummary(rec,'pre'),post=phaseSummary(rec,'post');
+  const pctChange=(pre.filled&&post.filled&&pre.pct>0)?Math.round((post.pct-pre.pct)/pre.pct*100):null;
+  let resultRows='';STATIONS.forEach(s=>{const pv=(rec.scores.pre||{})[s.key],qv=(rec.scores.post||{})[s.key],pr=pre.pts[s.key],qr=post.pts[s.key],d=(pr!=null&&qr!=null)?qr-pr:null;
+    resultRows+=`<tr><td><b>${s.no}. ${s.comp}</b><div class="muted" style="font-size:.72rem">${s.name}</div></td><td>${pv!=null?pv+' '+unitAbbr(s):'—'}</td><td>${pr?`<span class="${rcls(pr)}">${RATE_LABELS[pr]}</span>`:'—'}</td><td>${qv!=null?qv+' '+unitAbbr(s):'—'}</td><td>${qr?`<span class="${rcls(qr)}">${RATE_LABELS[qr]}</span>`:'—'}</td><td>${d==null?'—':`<b style="color:${d>0?'var(--ok)':d<0?'var(--bad)':'var(--muted)'}">${d>0?'▲ +'+d:d<0?'▼ '+d:'▬ 0'}</b>`}</td></tr>`;});
+  el('studBody').innerHTML=`
+    <div class="cards-grid grid-3" style="margin-bottom:18px">
+      <div class="card"><h3>${ic('clipboard-pen')} 1 · Pre-test</h3><div class="num grok" style="font-size:2rem">${pre.filled?pre.pct+'%':'—'}</div><div class="lbl muted" style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em">${pre.filled?pre.rating:'no data'} · ${pre.filled}/${STATIONS.length} stations</div></div>
+      <div class="card"><h3>${ic('clipboard-check')} 2 · Post-test</h3><div class="num grok" style="font-size:2rem">${post.filled?post.pct+'%':'—'}</div><div class="lbl muted" style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em">${post.filled?post.rating:'no data'} · ${post.filled}/${STATIONS.length} stations</div></div>
+      <div class="card" style="border-color:var(--line-gold)"><h3>${ic('trending-up')} 3 · Improvement</h3><div class="num grok" style="font-size:2rem;color:${post.pct-pre.pct>=0?'var(--ok)':'var(--bad)'}">${(post.filled&&pre.filled)?(post.pct-pre.pct>=0?'+':'')+(post.pct-pre.pct)+'%':'—'}</div><div class="lbl muted" style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em">overall (${pre.pct}% → ${post.pct}%)</div>${pctChange!=null?`<p class="muted" style="font-size:.82rem;margin-top:8px">Relative gain: <b class="gold">${pctChange>=0?'+':''}${pctChange}%</b> vs pre-test.</p>`:''}</div>
+    </div>
+    <div class="cards-grid grid-2" style="margin-bottom:18px">
+      <div class="card"><h3>${ic('radar')} Pre vs Post</h3><div class="chart-box"><canvas id="rRadar"></canvas></div></div>
+      <div class="card"><h3>${ic('bar-chart-3')} Component improvement</h3><div class="chart-box"><canvas id="rBar"></canvas></div></div>
+    </div>
+    <div class="card"><h3>${ic('table')} Detailed result</h3>
+      <div class="tbl-wrap"><table><thead><tr><th>Component</th><th>Pre score</th><th>Pre remark</th><th>Post score</th><th>Post remark</th><th>Δ level</th></tr></thead><tbody>${resultRows}</tbody></table></div>
+      <p class="muted" style="font-size:.78rem;margin-top:8px">Your improvement is shown per component and overall. Inferential significance testing (paired t-test) is available to your teacher and the administrator.</p>
+      <div style="display:flex;gap:10px;margin-top:14px"><button class="btn btn-gold" id="dlStud">${ic('download')} Download my result (PDF)</button></div>
+    </div>`;
+  icons();
+  radarChart(el('rRadar'),pre.pts,post.filled?post.pts:null);
+  const labels=[],data=[];STATIONS.forEach(s=>{if(pre.pts[s.key]!=null&&post.pts[s.key]!=null){labels.push(s.short);data.push(post.pts[s.key]-pre.pts[s.key]);}});
+  if(data.length)barChart(el('rBar'),labels,data);else el('rBar').parentElement.innerHTML='<p class="muted" style="text-align:center;padding-top:120px">Enter both pre &amp; post scores to see improvements.</p>';
+  el('dlStud').onclick=()=>downloadResult(rec,false);
+}
+function studGuide(){el('studBody').innerHTML=`<div class="card"><h3>${ic('book-open')} How to perform each station</h3><p class="sub">Study the mechanics so pre- and post-tests are conducted consistently — the credibility of scores depends on proper execution.</p>${STATIONS.map(s=>{const G=GUIDE[s.key];return`<div class="station"><div class="station-top"><div class="name"><b>${ic(ICON[s.key])} ${s.no}. ${s.name}</b><div class="cmp">${s.comp} · unit: ${s.unit}${s.dir==='low'?' (lower is better)':''}</div></div></div><div class="guide open" style="max-height:none"><span class="tag">Purpose: ${G.purpose}</span><span class="tag">Equipment: ${G.equip}</span><ol>${G.steps.map(x=>`<li>${x}</li>`).join('')}</ol><div style="font-weight:600;color:var(--gold-soft);font-size:.74rem;text-transform:uppercase;letter-spacing:.08em;margin:6px 0 2px">Scoring matrix (${s.unit})</div>${scoringMatrix(s.key)}</div></div>`;}).join('')}</div>`;icons();}
+
+/* ============================================================ 8. TEACHER ============================================================ */
+function teacherSections(){return(SESSION.sections&&SESSION.sections.length)?SESSION.sections:['Unassigned'];}
+function studentsInSection(sec){return DB.students.filter(s=>s.section===sec);}
+let activeSection=null;
+function renderTeacher(){
+  clearCharts();const secs=teacherSections();if(!activeSection||!secs.includes(activeSection))activeSection=secs[0];
+  const list=studentsInSection(activeSection),agg=sectionAggregate(list);
+  el('appMain').innerHTML=`
+    <div class="eyebrow">Class Management</div><h2 class="sec">Section Monitoring</h2>
+    <p class="sub">Enrol students by email, track who completed each test, review interventions, and analyze performance.</p>
+    <div class="tabbar" id="secTabs">${secs.map(s=>`<div class="tab ${s===activeSection?'active':''}" data-sec="${esc(s)}">${ic('users')}${esc(s)} · ${studentsInSection(s).length}</div>`).join('')}<div class="tab no-print" id="addSecBtn">${ic('plus')}Add section</div></div>
+    <div class="cards-grid grid-4" style="margin-bottom:18px">
+      ${stat(list.length,'Enrolled','users')}
+      ${stat(list.filter(r=>phaseStatus(r,'pre')==='done').length+'<small>/'+list.length+'</small>','Pre-test done','clipboard-pen')}
+      ${stat(list.filter(r=>phaseStatus(r,'post')==='done').length+'<small>/'+list.length+'</small>','Post-test done','clipboard-check')}
+      ${stat((agg.postAvgPct-agg.preAvgPct>=0?'+':'')+(agg.postAvgPct-agg.preAvgPct)+'<small>%</small>','Avg gain','trending-up')}
+    </div>
+    <div class="cards-grid grid-2" style="margin-bottom:18px">
+      <div class="card"><h3>${ic('radar')} Class average radar</h3><div class="chart-box"><canvas id="tRadar"></canvas></div></div>
+      <div class="card"><h3>${ic('bar-chart-3')} Avg improvement by component</h3><div class="chart-box"><canvas id="tBar"></canvas></div></div>
+    </div>
+    <div class="card" style="margin-bottom:18px"><h3>${ic('flask-conical')} Statistical analysis — ${esc(activeSection)}</h3>${classStatBlock(list)}</div>
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px"><h3 style="margin:0;flex:1">${ic('users')} Enrolled students &amp; completion</h3>
+        <button class="btn btn-gold btn-sm no-print" id="addStudBtn">${ic('user-plus')} Enrol by email</button>
+        <button class="btn btn-sm no-print" id="csvBtn">${ic('download')} CSV</button>
+        <button class="btn btn-sm no-print" id="reportBtn">${ic('file-text')} Report</button></div>
+      <div class="tbl-wrap" id="rosterWrap"></div></div>`;
+  radarChart(el('tRadar'),agg.prePts,agg.postPts);
+  barChart(el('tBar'),STATIONS.map(s=>s.short),STATIONS.map(s=>+((agg.postPts[s.key]||0)-(agg.prePts[s.key]||0)).toFixed(2)));
+  renderRoster(list,'rosterWrap');
+  el('secTabs').addEventListener('click',e=>{const t=e.target.closest('.tab[data-sec]');if(t){activeSection=t.dataset.sec;renderTeacher();}});
+  el('addSecBtn').onclick=addSection;el('addStudBtn').onclick=()=>addStudentByEmail(activeSection);
+  el('csvBtn').onclick=()=>exportCSV(list,'section_'+activeSection);el('reportBtn').onclick=()=>printStatReport('Section '+activeSection,list);
+  icons();
+}
+function sectionAggregate(list){const prePts={},postPts={},preC={},postC={};let preSum=0,preN=0,postSum=0,postN=0;STATIONS.forEach(s=>{prePts[s.key]=0;postPts[s.key]=0;preC[s.key]=0;postC[s.key]=0;});list.forEach(rec=>{const p=phaseSummary(rec,'pre'),q=phaseSummary(rec,'post');STATIONS.forEach(s=>{if(p.pts[s.key]!=null){prePts[s.key]+=p.pts[s.key];preC[s.key]++;}if(q.pts[s.key]!=null){postPts[s.key]+=q.pts[s.key];postC[s.key]++;}});if(p.filled){preSum+=p.pct;preN++;}if(q.filled){postSum+=q.pct;postN++;}});STATIONS.forEach(s=>{prePts[s.key]=preC[s.key]?+(prePts[s.key]/preC[s.key]).toFixed(2):0;postPts[s.key]=postC[s.key]?+(postPts[s.key]/postC[s.key]).toFixed(2):0;});return{prePts,postPts,preAvgPct:preN?Math.round(preSum/preN):0,postAvgPct:postN?Math.round(postSum/postN):0};}
+function classStatBlock(list){const pre=[],post=[];list.forEach(rec=>{const p=phaseSummary(rec,'pre'),q=phaseSummary(rec,'post');if(p.filled&&q.filled){pre.push(p.pct);post.push(q.pct);}});if(pre.length<2)return`<p class="muted">Need ≥ 2 students with both pre- and post-test results for a class-level paired t-test.</p>`;const res=pairedT(pre,post);return`<div class="stat-readout"><p>Descriptives (overall % score): pre-test <code>M = ${mean(pre).toFixed(1)}</code>, <code>SD = ${sd(pre).toFixed(1)}</code>; post-test <code>M = ${mean(post).toFixed(1)}</code>, <code>SD = ${sd(post).toFixed(1)}</code> (n = ${pre.length} students).</p>${statBlock(res,'overall % score across students')}</div>`;}
+function renderRoster(list,mountId){
+  let h=`<table><thead><tr><th>Name</th><th>Email</th><th>Sex</th><th>Pre-test</th><th>Post-test</th><th>Intervention</th><th>Pre %</th><th>Post %</th><th>Gain</th><th class="no-print">Actions</th></tr></thead><tbody>`;
+  if(!list.length)h+=`<tr><td colspan="10" class="muted" style="text-align:center;padding:24px">No students enrolled. Click “Enrol by email”.</td></tr>`;
+  list.forEach(rec=>{const p=phaseSummary(rec,'pre'),q=phaseSummary(rec,'post'),gain=(p.filled&&q.filled)?q.pct-p.pct:null;
+    h+=`<tr><td><b>${esc(rec.name)}</b></td><td class="muted" style="font-size:.78rem">${esc(rec.email||'—')}</td><td>${rec.gender}</td>
+      <td>${statusChip(phaseStatus(rec,'pre'),p.filled)}</td><td>${statusChip(phaseStatus(rec,'post'),q.filled)}</td>
+      <td>${rec.intervention?`<span class="chip done">${ic('paperclip')} Yes</span>`:`<span class="chip none">—</span>`}</td>
+      <td>${p.filled?p.pct+'%':'—'}</td><td>${q.filled?q.pct+'%':'—'}</td>
+      <td>${gain==null?'—':`<b style="color:${gain>=0?'var(--ok)':'var(--bad)'}">${gain>=0?'+':''}${gain}%</b>`}</td>
+      <td class="no-print" style="white-space:nowrap">
+        <button class="iconbtn" data-result="${rec.id}" title="View result">${ic('line-chart')}</button>
+        <button class="iconbtn" data-iv="${rec.id}" title="View intervention">${ic('paperclip')}</button>
+        <button class="iconbtn" data-edit="${rec.id}" title="Edit scores">${ic('pencil')}</button>
+        <button class="iconbtn" data-unreg="${rec.id}" title="Unregister">${ic('user-minus')}</button>
+      </td></tr>`;});
+  el(mountId).innerHTML=h+'</tbody></table>';icons();
+  el(mountId).querySelectorAll('[data-result]').forEach(b=>b.onclick=()=>downloadResult(DB.students.find(s=>s.id===b.dataset.result),true));
+  el(mountId).querySelectorAll('[data-iv]').forEach(b=>b.onclick=()=>viewIntervention(DB.students.find(s=>s.id===b.dataset.iv)));
+  el(mountId).querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>editStudent(b.dataset.edit));
+  el(mountId).querySelectorAll('[data-unreg]').forEach(b=>b.onclick=()=>{const r=DB.students.find(s=>s.id===b.dataset.unreg);if(confirm('Unregister '+r.name+' from this section? (Use this if added by mistake.)')){DB.students=DB.students.filter(s=>s.id!==b.dataset.unreg);save();rerender();}});
+}
+function addSection(){modal(`<h3 class="grok">${ic('plus')} Add a section</h3><label class="fld"><span>Section name</span><input id="newSec" placeholder="e.g. BSED-PE 1B"></label><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" data-close>Cancel</button><button class="btn btn-gold" id="newSecBtn">Add</button></div>`);el('newSecBtn').onclick=()=>{const s=val('newSec');if(!s)return;SESSION.sections=SESSION.sections||[];if(!SESSION.sections.includes(s))SESSION.sections.push(s);save();activeSection=s;closeModal();renderTeacher();};}
+function addStudentByEmail(section){
+  modal(`<h3 class="grok">${ic('user-plus')} Enrol student — ${esc(section)}</h3><p class="sub">Enrolled by email. When the student signs in with this email, this becomes their permanent section.</p>
+  <div class="row">
+    <label class="fld"><span>Full name</span><input id="asName"></label>
+    <label class="fld"><span>Email</span><input id="asEmail" placeholder="name@student.edu"></label>
+    <label class="fld"><span>Gender</span><select id="asGender"><option value="M">Male</option><option value="F">Female</option></select></label>
+    <label class="fld"><span>Age</span><input id="asAge" type="number"></label>
+  </div><div class="err" id="asErr"></div>
+  <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" data-close>Cancel</button><button class="btn btn-gold" id="asBtn">Enrol</button></div>`);
+  el('asBtn').onclick=()=>{const name=val('asName'),email=val('asEmail').toLowerCase();if(!name||!email){el('asErr').textContent='Name and email are required.';return;}const ex=DB.students.find(s=>s.email&&s.email.toLowerCase()===email);if(ex){ex.section=section;ex.name=ex.name||name;save();closeModal();toast('Existing student moved to '+section);rerender();return;}DB.students.push({id:uid(),name,email,gender:val('asGender'),age:val('asAge'),heightM:'',weightKg:'',section,createdBy:SESSION.id,hr:{pre:{},post:{}},scores:{pre:{},post:{}}});save();closeModal();toast('Student enrolled');rerender();};
+}
+function editStudent(id){
+  const rec=DB.students.find(s=>s.id===id);if(!rec)return;
+  const mkRows=ph=>STATIONS.map(s=>{const v=(rec.scores[ph]||{})[s.key];return`<tr><td>${s.no}. ${s.comp}</td><td><input type="number" step="0.01" data-e="${ph}" data-k="${s.key}" value="${v!=null?v:''}" style="padding:6px 8px"></td></tr>`;}).join('');
+  modal(`<h3 class="grok">${ic('pencil')} Edit — ${esc(rec.name)}</h3>
+    <div class="row" style="margin-bottom:10px">
+      <label class="fld"><span>Name</span><input id="esName" value="${esc(rec.name)}"></label>
+      <label class="fld"><span>Email</span><input id="esEmail" value="${esc(rec.email||'')}"></label>
+      <label class="fld"><span>Gender</span><select id="esG"><option value="M"${rec.gender!=='F'?' selected':''}>Male</option><option value="F"${rec.gender==='F'?' selected':''}>Female</option></select></label>
+      <label class="fld"><span>Age</span><input id="esAge" type="number" value="${rec.age||''}"></label>
+      <label class="fld"><span>Height (m)</span><input id="esH" type="number" step="0.01" value="${rec.heightM||''}"></label>
+      <label class="fld"><span>Weight (kg)</span><input id="esW" type="number" step="0.1" value="${rec.weightKg||''}"></label>
+      <label class="fld"><span>Section</span><input id="esSec" value="${esc(rec.section||'')}"></label>
+    </div>
+    <div class="row"><div><div class="lbl muted" style="font-size:.7rem;text-transform:uppercase;margin-bottom:4px">Pre-test</div><table>${mkRows('pre')}</table></div><div><div class="lbl muted" style="font-size:.7rem;text-transform:uppercase;margin-bottom:4px">Post-test</div><table>${mkRows('post')}</table></div></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px"><button class="btn btn-maroon btn-sm" id="esDel" style="margin-right:auto">${ic('trash-2')} Delete</button><button class="btn" data-close>Cancel</button><button class="btn btn-gold" id="esSave">Save</button></div>`);
+  el('esSave').onclick=()=>{rec.name=val('esName')||rec.name;rec.email=val('esEmail');rec.gender=val('esG');rec.age=val('esAge');rec.heightM=val('esH');rec.weightKg=val('esW');rec.section=val('esSec')||rec.section;document.querySelectorAll('[data-e]').forEach(inp=>{const ph=inp.dataset.e,k=inp.dataset.k;rec.scores[ph]=rec.scores[ph]||{};if(inp.value==='')delete rec.scores[ph][k];else rec.scores[ph][k]=parseFloat(inp.value);});save();closeModal();toast('Saved');rerender();};
+  el('esDel').onclick=()=>{if(confirm('Delete '+rec.name+'?')){DB.students=DB.students.filter(s=>s.id!==id);save();closeModal();rerender();}};
+}
+
+/* ============================================================ 9. MANAGERIAL ============================================================ */
+let mgrTab='overview';
+function renderManagerial(){
+  clearCharts();
+  el('appMain').innerHTML=`<div class="eyebrow">Administrator</div><h2 class="sec">Managerial Console</h2>
+    <p class="sub">Oversee everything — teachers, students, enrolment, results, norms, and institution-wide reports.</p>
+    <div class="tabbar">${[['overview','layout-dashboard','Overview'],['students','users','Students'],['accounts','user-cog','Teachers & accounts'],['sections','school','Sections'],['norms','sliders-horizontal','Norms']].map(t=>`<div class="tab ${mgrTab===t[0]?'active':''}" data-mt="${t[0]}">${ic(t[1])}${t[2]}</div>`).join('')}</div><div id="mgrBody"></div>`;
+  document.querySelectorAll('[data-mt]').forEach(t=>t.onclick=()=>{mgrTab=t.dataset.mt;renderManagerial();});
+  ({overview:mgrOverview,students:mgrStudents,accounts:mgrAccounts,sections:mgrSections,norms:mgrNorms}[mgrTab])();icons();
+}
+function allSections(){return[...new Set(DB.students.map(s=>s.section||'Unassigned'))];}
+function mgrOverview(){
+  const all=DB.students,agg=sectionAggregate(all);
+  el('mgrBody').innerHTML=`
+    <div class="cards-grid grid-4" style="margin-bottom:18px">${stat(all.length,'Total students','users')}${stat(allSections().length,'Sections','school')}${stat(DB.users.filter(u=>u.role==='teacher').length,'Teachers','clipboard-check')}${stat((agg.postAvgPct-agg.preAvgPct>=0?'+':'')+(agg.postAvgPct-agg.preAvgPct)+'<small>%</small>','Avg gain','trending-up')}</div>
+    <div class="cards-grid grid-2" style="margin-bottom:18px"><div class="card"><h3>${ic('radar')} Institution radar</h3><div class="chart-box"><canvas id="mRadar"></canvas></div></div><div class="card"><h3>${ic('bar-chart-3')} Avg improvement by component</h3><div class="chart-box"><canvas id="mBar"></canvas></div></div></div>
+    <div class="card" style="margin-bottom:18px"><h3>${ic('flask-conical')} Institution-wide statistical analysis</h3>${classStatBlock(all)}</div>
+    <div class="card"><div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap"><h3 style="flex:1;margin:0">${ic('trophy')} Top performers (post-test)</h3><button class="btn btn-sm no-print" id="repAll">${ic('file-text')} Institution report</button><button class="btn btn-sm no-print" id="csvAll">${ic('download')} Export all</button></div><div class="tbl-wrap" id="topWrap"></div></div>`;
+  radarChart(el('mRadar'),agg.prePts,agg.postPts);barChart(el('mBar'),STATIONS.map(s=>s.short),STATIONS.map(s=>+((agg.postPts[s.key]||0)-(agg.prePts[s.key]||0)).toFixed(2)));
+  const ranked=all.map(r=>({r,q:phaseSummary(r,'post')})).filter(x=>x.q.filled).sort((a,b)=>b.q.pct-a.q.pct).slice(0,10);
+  let h=`<table><thead><tr><th>#</th><th>Name</th><th>Section</th><th>Post %</th><th>Rating</th></tr></thead><tbody>`;ranked.forEach((x,i)=>{const rt=Math.round(x.q.avg);h+=`<tr><td>${i+1}</td><td><b>${esc(x.r.name)}</b></td><td>${esc(x.r.section)}</td><td>${x.q.pct}%</td><td><span class="${rcls(rt)}">${RATE_LABELS[rt]}</span></td></tr>`;});if(!ranked.length)h+=`<tr><td colspan="5" class="muted" style="text-align:center;padding:20px">No post-test data yet.</td></tr>`;el('topWrap').innerHTML=h+'</tbody></table>';
+  el('csvAll').onclick=()=>exportCSV(all,'all_students');el('repAll').onclick=()=>printStatReport('Institution-wide',all);icons();
+}
+function mgrStudents(){
+  const all=DB.students;
+  let h=`<div class="card"><div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap"><h3 style="flex:1;margin:0">${ic('users')} All students (${all.length})</h3><button class="btn btn-gold btn-sm" id="mAddStud">${ic('user-plus')} Add student</button><button class="btn btn-sm" id="mCsv">${ic('download')} CSV</button></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Section</th><th>Sex</th><th>Pre</th><th>Post</th><th>Plan</th><th>Gain</th><th>Actions</th></tr></thead><tbody>`;
+  if(!all.length)h+=`<tr><td colspan="9" class="muted" style="text-align:center;padding:20px">No students.</td></tr>`;
+  all.forEach(rec=>{const p=phaseSummary(rec,'pre'),q=phaseSummary(rec,'post'),gain=(p.filled&&q.filled)?q.pct-p.pct:null;h+=`<tr><td><b>${esc(rec.name)}</b></td><td class="muted" style="font-size:.78rem">${esc(rec.email||'—')}</td><td>${esc(rec.section)}</td><td>${rec.gender}</td><td>${statusChip(phaseStatus(rec,'pre'),p.filled)}</td><td>${statusChip(phaseStatus(rec,'post'),q.filled)}</td><td>${rec.intervention?`<span class="chip done">${ic('paperclip')}</span>`:'—'}</td><td>${gain==null?'—':`<b style="color:${gain>=0?'var(--ok)':'var(--bad)'}">${gain>=0?'+':''}${gain}%</b>`}</td><td style="white-space:nowrap"><button class="iconbtn" data-result="${rec.id}" title="Result">${ic('line-chart')}</button> <button class="iconbtn" data-iv="${rec.id}" title="Intervention">${ic('paperclip')}</button> <button class="iconbtn" data-edit="${rec.id}" title="Edit">${ic('pencil')}</button> <button class="iconbtn" data-del="${rec.id}" title="Delete">${ic('trash-2')}</button></td></tr>`;});
+  el('mgrBody').innerHTML=h+'</tbody></table></div></div>';
+  el('mgrBody').querySelectorAll('[data-result]').forEach(b=>b.onclick=()=>downloadResult(DB.students.find(s=>s.id===b.dataset.result),true));
+  el('mgrBody').querySelectorAll('[data-iv]').forEach(b=>b.onclick=()=>viewIntervention(DB.students.find(s=>s.id===b.dataset.iv)));
+  el('mgrBody').querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>editStudent(b.dataset.edit));
+  el('mgrBody').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{const r=DB.students.find(s=>s.id===b.dataset.del);if(confirm('Delete '+r.name+'?')){DB.students=DB.students.filter(s=>s.id!==b.dataset.del);save();renderManagerial();}});
+  el('mAddStud').onclick=()=>addStudentByEmail(SECTIONS[0].label);el('mCsv').onclick=()=>exportCSV(all,'all_students');icons();
+}
+function mgrAccounts(){
+  let h=`<div class="card"><div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap"><h3 style="flex:1;margin:0">${ic('user-cog')} Teachers &amp; accounts</h3><button class="btn btn-sm" id="cloudBtn">${ic('cloud')} Cloud sync</button><button class="btn btn-gold btn-sm" id="addUser">${ic('user-plus')} Add account</button></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Username</th><th>Role</th><th>Section(s)</th><th></th></tr></thead><tbody>`;
+  DB.users.forEach(u=>{h+=`<tr><td><b>${esc(u.name)}</b></td><td class="muted" style="font-size:.78rem">${esc(u.email||'—')}</td><td>${esc(u.username)}</td><td><span class="rate ${u.role==='managerial'?'r1':u.role==='teacher'?'r4':'r3'}">${u.role}</span></td><td>${esc((u.sections||[]).join(', ')||'—')}</td><td>${u.id!=='u_admin'?`<button class="iconbtn" data-deluser="${u.id}" title="Remove">${ic('trash-2')}</button>`:'<span class="muted">—</span>'}</td></tr>`;});
+  el('mgrBody').innerHTML=h+'</tbody></table></div></div>';
+  el('addUser').onclick=openAccountModal;el('cloudBtn').onclick=openCloudModal;
+  el('mgrBody').querySelectorAll('[data-deluser]').forEach(b=>b.onclick=()=>{if(confirm('Remove this account?')){DB.users=DB.users.filter(u=>u.id!==b.dataset.deluser);save();renderManagerial();}});icons();
+}
+function openAccountModal(){
+  modal(`<h3 class="grok">${ic('user-plus')} Add account</h3><div class="row">
+    <label class="fld"><span>Name</span><input id="auName"></label>
+    <label class="fld"><span>Role</span><select id="auRole"><option value="teacher">Teacher</option><option value="student">Student</option><option value="managerial">Managerial</option></select></label>
+    <label class="fld"><span>Email</span><input id="auEmail"></label>
+    <label class="fld"><span>Username</span><input id="auUser"></label>
+    <label class="fld"><span>Password</span><input id="auPass"></label>
+    <label class="fld"><span>Section</span><input id="auSec" placeholder="teacher: section handled / student: enrolled"></label></div>
+    <div class="err" id="auErr"></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" data-close>Cancel</button><button class="btn btn-gold" id="auBtn">Create</button></div>`);
+  el('auBtn').onclick=()=>{const name=val('auName'),role=val('auRole'),email=val('auEmail'),user=val('auUser'),pass=val('auPass'),sec=val('auSec');if(!name||!user||!pass){el('auErr').textContent='Name, username and password are required.';return;}if(DB.users.some(u=>u.username.toLowerCase()===user.toLowerCase())){el('auErr').textContent='Username taken.';return;}const nu={id:uid(),name,email,username:user,pass,role};if(role==='teacher')nu.sections=[sec||'Unassigned'];if(role==='student'&&email&&!DB.students.some(s=>s.email&&s.email.toLowerCase()===email.toLowerCase()))DB.students.push({id:uid(),name,email,gender:'M',age:'',heightM:'',weightKg:'',section:sec||'Unassigned',createdBy:nu.id,hr:{pre:{},post:{}},scores:{pre:{},post:{}}});DB.users.push(nu);save();closeModal();renderManagerial();};
+}
+function mgrSections(){
+  let h=`<div class="card"><h3>${ic('school')} All sections</h3><div class="tbl-wrap"><table><thead><tr><th>Section</th><th>Teacher</th><th>Enrolled</th><th>Pre done</th><th>Post done</th><th>Avg pre</th><th>Avg post</th><th>Gain</th><th></th></tr></thead><tbody>`;
+  allSections().forEach(sec=>{const list=studentsInSection(sec),a=sectionAggregate(list);const teacher=(SECTIONS.find(x=>x.label===sec)||{}).teacher||(DB.users.find(u=>u.sections&&u.sections.includes(sec))||{}).name||'—';
+    h+=`<tr><td><b>${esc(sec)}</b></td><td class="muted" style="font-size:.8rem">${esc(teacher)}</td><td>${list.length}</td><td>${list.filter(r=>phaseStatus(r,'pre')==='done').length}</td><td>${list.filter(r=>phaseStatus(r,'post')==='done').length}</td><td>${a.preAvgPct}%</td><td>${a.postAvgPct}%</td><td><b style="color:${a.postAvgPct-a.preAvgPct>=0?'var(--ok)':'var(--bad)'}">${a.postAvgPct-a.preAvgPct>=0?'+':''}${a.postAvgPct-a.preAvgPct}%</b></td><td style="white-space:nowrap"><button class="iconbtn" data-enr="${esc(sec)}" title="View enrolled">${ic('users')}</button> <button class="iconbtn" data-rep="${esc(sec)}" title="Report">${ic('file-text')}</button></td></tr>`;});
+  el('mgrBody').innerHTML=h+'</tbody></table></div></div>';
+  el('mgrBody').querySelectorAll('[data-rep]').forEach(b=>b.onclick=()=>printStatReport('Section '+b.dataset.rep,studentsInSection(b.dataset.rep)));
+  el('mgrBody').querySelectorAll('[data-enr]').forEach(b=>b.onclick=()=>showEnrolled(b.dataset.enr));icons();
+}
+function showEnrolled(sec){const list=studentsInSection(sec);
+  modal(`<h3 class="grok">${ic('users')} Enrolled — ${esc(sec)} (${list.length})</h3>
+    <div class="tbl-wrap" style="max-height:60vh"><table><thead><tr><th>Name</th><th>Email</th><th>Sex</th><th>Pre</th><th>Post</th><th>Result</th></tr></thead><tbody>
+    ${list.map(r=>{const p=phaseSummary(r,'pre'),q=phaseSummary(r,'post');return`<tr><td><b>${esc(r.name)}</b></td><td class="muted" style="font-size:.78rem">${esc(r.email||'—')}</td><td>${r.gender}</td><td>${statusChip(phaseStatus(r,'pre'),p.filled)}</td><td>${statusChip(phaseStatus(r,'post'),q.filled)}</td><td><button class="iconbtn" data-res="${r.id}">${ic('line-chart')}</button></td></tr>`;}).join('')||'<tr><td colspan="6" class="muted" style="text-align:center;padding:18px">No students enrolled.</td></tr>'}
+    </tbody></table></div><div style="display:flex;justify-content:flex-end;margin-top:12px"><button class="btn" data-close>Close</button></div>`);
+  document.querySelectorAll('[data-res]').forEach(b=>b.onclick=()=>downloadResult(DB.students.find(s=>s.id===b.dataset.res),true));icons();
+}
+function mgrNorms(){
+  let h=`<div class="card"><h3>${ic('sliders-horizontal')} Rating thresholds</h3><p class="sub">Cut-points for Very Good / Good / Average / Poor (below Poor = Very Poor). “↓” = lower is better. Edit to fit your population, then save.</p><div class="tbl-wrap"><table><thead><tr><th>Station (Component)</th><th>Sex</th><th>Very Good</th><th>Good</th><th>Average</th><th>Poor</th><th>Source</th></tr></thead><tbody>`;
+  STATIONS.forEach(s=>{const n=DB.norms[s.key];['M','F'].forEach(g=>{h+=`<tr><td>${g==='M'?`<b>${s.no}. ${s.name}</b><br><span class="muted" style="font-size:.72rem">${s.comp} (${s.unit})${s.dir==='low'?' ↓':''}</span>`:''}</td><td>${g==='M'?'Male':'Female'}</td>`;n[g].forEach((v,i)=>{h+=`<td><input style="width:80px;padding:5px" type="number" step="0.01" data-norm="${s.key}" data-g="${g}" data-i="${i}" value="${v}"></td>`;});h+=`<td>${g==='M'?`<span class="rate ${n.src==='manual'?'r4':'r3'}">${n.src}</span>`:''}</td></tr>`;});});
+  el('mgrBody').innerHTML=h+`</tbody></table></div><div style="display:flex;gap:10px;margin-top:16px"><button class="btn btn-gold" id="saveNorms">${ic('save')} Save norms</button><button class="btn" id="resetNorms">${ic('rotate-ccw')} Reset to instrument defaults</button></div></div>`;
+  el('saveNorms').onclick=()=>{document.querySelectorAll('[data-norm]').forEach(inp=>{DB.norms[inp.dataset.norm][inp.dataset.g][+inp.dataset.i]=parseFloat(inp.value);});save();toast('Norms saved');};
+  el('resetNorms').onclick=()=>{if(confirm('Reset all thresholds to the original instrument defaults?')){DB.norms=JSON.parse(JSON.stringify(DEFAULT_NORMS));save();renderManagerial();}};icons();
+}
+
+/* ============================================================ 10. EXPORT / REPORTS ============================================================ */
+function csv(s){s=(s==null?'':String(s));return/[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}
+function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href);}
+function exportCSV(list,fname){const head=['Name','Email','Sex','Age','Height_m','Weight_kg','BMI','Section'];STATIONS.forEach(s=>head.push(s.short+'_pre',s.short+'_preRemark',s.short+'_post',s.short+'_postRemark'));head.push('Pre_%','Post_%','Gain_%','Intervention');const rows=[head.join(',')];list.forEach(rec=>{const p=phaseSummary(rec,'pre'),q=phaseSummary(rec,'post'),bmi=bmiOf(rec.heightM,rec.weightKg);const r=[csv(rec.name),csv(rec.email),rec.gender,rec.age,rec.heightM,rec.weightKg,bmi?bmi.toFixed(1):'',csv(rec.section)];STATIONS.forEach(s=>{const pv=(rec.scores.pre||{})[s.key],qv=(rec.scores.post||{})[s.key];r.push(pv!=null?pv:'',p.pts[s.key]!=null?RATE_LABELS[p.pts[s.key]]:'',qv!=null?qv:'',q.pts[s.key]!=null?RATE_LABELS[q.pts[s.key]]:'');});r.push(p.filled?p.pct:'',q.filled?q.pct:'',(p.filled&&q.filled)?q.pct-p.pct:'',rec.intervention?'Yes':'No');rows.push(r.join(','));});dl(new Blob([rows.join('\n')],{type:'text/csv'}),(fname||'pft')+'.csv');toast('CSV exported');}
+function downloadResult(rec,showSig){
+  if(!rec)return;const p=phaseSummary(rec,'pre'),q=phaseSummary(rec,'post'),bmi=bmiOf(rec.heightM,rec.weightKg);const k=karvonen(rec.age,(rec.hr&&rec.hr.post&&rec.hr.post.rhr)||(rec.hr&&rec.hr.pre&&rec.hr.pre.rhr));
+  const res=pairedT(STATIONS.map(s=>p.pts[s.key]!=null?p.pts[s.key]:null),STATIONS.map(s=>q.pts[s.key]!=null?q.pts[s.key]:null));
+  let rowsHtml='';STATIONS.forEach(s=>{const pv=(rec.scores.pre||{})[s.key],qv=(rec.scores.post||{})[s.key],pr=p.pts[s.key],qr=q.pts[s.key],d=(pr!=null&&qr!=null)?qr-pr:null;rowsHtml+=`<tr><td>${s.no}. ${s.name}</td><td>${s.comp}</td><td>${pv!=null?pv:'—'}</td><td>${pr!=null?RATE_LABELS[pr]:'—'}</td><td>${qv!=null?qv:'—'}</td><td>${qr!=null?RATE_LABELS[qr]:'—'}</td><td style="color:${d>0?'#1a7f43':d<0?'#b3261e':'#666'}">${d==null?'—':(d>0?'▲ +'+d:d<0?'▼ '+d:'▬ 0')}</td></tr>`;});
+  const statTxt=res.insufficient?'Insufficient paired data for a t-test.':`Paired t-test across 10 components: M = ${res.md>=0?'+':''}${res.md.toFixed(2)}, SD = ${res.sdd.toFixed(2)}, t(${res.df}) = ${isFinite(res.t)?res.t.toFixed(2):'∞'}, ${fmtP(res.p)}, Cohen's d = ${isFinite(res.cohend)?res.cohend.toFixed(2):'∞'} (${res.p<0.05?'significant':'not significant'} at α=.05).`;
+  const win=window.open('','_blank');if(!win){toast('Allow pop-ups to download the report');return;}
+  win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>PFT Result — ${esc(rec.name)}</title><style>body{font-family:Georgia,serif;color:#1a1a1a;max-width:800px;margin:24px auto;padding:0 20px}h1{font-size:20px;border-bottom:3px solid #6b1320;padding-bottom:8px;color:#6b1320}.meta{font-size:13px;color:#444;margin:8px 0 16px}.sum{display:flex;gap:14px;margin:14px 0}.box{flex:1;border:1px solid #ccc;border-radius:8px;padding:10px;text-align:center}.box b{font-size:22px;color:#6b1320;display:block}table{width:100%;border-collapse:collapse;font-size:12.5px;margin:10px 0}th,td{border:1px solid #ccc;padding:6px 8px;text-align:left}th{background:#6b1320;color:#ffd95e}.stat{font-size:12.5px;background:#faf6ef;border:1px solid #e6dcc8;border-radius:8px;padding:10px;margin-top:6px}@media print{.np{display:none}}</style></head><body>
+  <h1>BPED Physical Fitness Test — Individual Result</h1>
+  <div class="meta"><b>${esc(rec.name)}</b> | ${rec.gender==='F'?'Female':'Male'} | Age ${rec.age||'—'} | ${esc(rec.section||'')} | ${esc(rec.email||'')}<br>Height ${rec.heightM||'—'} m · Weight ${rec.weightKg||'—'} kg · BMI ${bmi?bmi.toFixed(1)+' ('+bmiClass(bmi)+')':'—'} · MHR ${k?k.mhr:'—'} bpm</div>
+  <div class="sum"><div class="box"><b>${p.pct}%</b>Pre-test (${p.rating})</div><div class="box"><b>${q.pct}%</b>Post-test (${q.rating})</div><div class="box"><b>${(p.filled&&q.filled)?(q.pct-p.pct>=0?'+':'')+(q.pct-p.pct)+'%':'—'}</b>Improvement</div></div>
+  <table><thead><tr><th>Station</th><th>Component</th><th>Pre</th><th>Pre remark</th><th>Post</th><th>Post remark</th><th>Change</th></tr></thead><tbody>${rowsHtml}</tbody></table>
+  ${showSig?`<div class="stat"><b>Scientific analysis.</b> ${statTxt}</div>`:''}
+  <p style="font-size:11px;color:#777;margin-top:10px">Generated by BPED PFT Analytics · MSU–General Santos.</p>
+  <button class="np" onclick="window.print()" style="padding:10px 18px;background:#6b1320;color:#ffd95e;border:none;border-radius:8px;cursor:pointer;font-size:14px">Save as PDF / Print</button></body></html>`);win.document.close();
+}
+function printStatReport(title,list){
+  const pre=[],post=[];list.forEach(rec=>{const p=phaseSummary(rec,'pre'),q=phaseSummary(rec,'post');if(p.filled&&q.filled){pre.push(p.pct);post.push(q.pct);}});
+  const res=pre.length>=2?pairedT(pre,post):{insufficient:true,n:pre.length};const preM=pre.length?mean(pre):0,postM=post.length?mean(post):0;const agg=sectionAggregate(list);
+  let compRows='';STATIONS.forEach(s=>{const a=agg.prePts[s.key]||0,b=agg.postPts[s.key]||0;compRows+=`<tr><td>${s.no}. ${s.comp}</td><td>${a.toFixed(2)}</td><td>${b.toFixed(2)}</td><td style="color:${b-a>0?'#1a7f43':b-a<0?'#b3261e':'#666'}">${(b-a>=0?'+':'')+(b-a).toFixed(2)}</td></tr>`;});
+  const statTxt=res.insufficient?`Insufficient paired data (n = ${res.n}) for a paired t-test.`:`A paired-samples t-test compared the post-test mean (M = ${postM.toFixed(1)}%, SD = ${sd(post).toFixed(1)}) with the pre-test mean (M = ${preM.toFixed(1)}%, SD = ${sd(pre).toFixed(1)}); mean difference = ${res.md>=0?'+':''}${res.md.toFixed(2)}, t(${res.df}) = ${isFinite(res.t)?res.t.toFixed(2):'∞'}, ${fmtP(res.p)}, Cohen's d = ${isFinite(res.cohend)?res.cohend.toFixed(2):'∞'}. The change is ${res.p<0.05?'<b>statistically significant</b>':'not statistically significant'} at α = .05 (${effSize(res.cohend)} effect).`;
+  const win=window.open('','_blank');if(!win){toast('Allow pop-ups to print the report');return;}
+  win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)} — Statistical Report</title><style>body{font-family:Georgia,serif;max-width:820px;margin:24px auto;padding:0 20px;color:#1a1a1a}h1{color:#6b1320;border-bottom:3px solid #6b1320;padding-bottom:8px;font-size:20px}h2{color:#6b1320;font-size:15px;margin-top:20px}table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px}th,td{border:1px solid #ccc;padding:6px 8px}th{background:#6b1320;color:#ffd95e}.stat{font-size:13px;background:#faf6ef;border:1px solid #e6dcc8;border-radius:8px;padding:12px;line-height:1.6}</style></head><body>
+  <h1>${esc(title)} — Physical Fitness Test Report</h1>
+  <p>Students: <b>${list.length}</b> · Paired (pre &amp; post): <b>${pre.length}</b> · Avg pre <b>${preM.toFixed(1)}%</b> · Avg post <b>${postM.toFixed(1)}%</b> · Avg gain <b>${(postM-preM>=0?'+':'')+(postM-preM).toFixed(1)}%</b></p>
+  <h2>Inferential statistics</h2><div class="stat">${statTxt}</div>
+  <h2>Mean rating by component (1–5)</h2><table><thead><tr><th>Component</th><th>Pre (M)</th><th>Post (M)</th><th>Change</th></tr></thead><tbody>${compRows}</tbody></table>
+  <h2>Enrolled roster</h2><table><thead><tr><th>Name</th><th>Email</th><th>Sex</th><th>Pre %</th><th>Post %</th><th>Gain</th></tr></thead><tbody>${list.map(r=>{const p=phaseSummary(r,'pre'),q=phaseSummary(r,'post');return`<tr><td>${esc(r.name)}</td><td>${esc(r.email||'')}</td><td>${r.gender}</td><td>${p.filled?p.pct+'%':'—'}</td><td>${q.filled?q.pct+'%':'—'}</td><td>${(p.filled&&q.filled)?((q.pct-p.pct>=0?'+':'')+(q.pct-p.pct)+'%'):'—'}</td></tr>`;}).join('')}</tbody></table>
+  <p style="font-size:11px;color:#777;margin-top:16px">BPED PFT Analytics · MSU–General Santos · One-group pretest–posttest design.</p>
+  <button onclick="window.print()" style="padding:10px 18px;background:#6b1320;color:#ffd95e;border:none;border-radius:8px;cursor:pointer">Save as PDF / Print</button></body></html>`);win.document.close();
+}
+
+/* ============================================================ BOOT ============================================================ */
+icons();
+initCloud();
+</script>
+</body>
+</html>
