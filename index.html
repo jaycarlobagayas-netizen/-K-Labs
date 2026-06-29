@@ -64,7 +64,6 @@ select option{background:var(--panel)}
 #loginView{position:relative;z-index:2;min-height:100vh;display:grid;place-items:center;padding:28px}
 .login-card{width:min(460px,100%);background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line-gold);border-radius:var(--radius);padding:34px 30px;box-shadow:0 30px 80px rgba(0,0,0,.55)}
 .login-brand{display:flex;align-items:center;gap:14px;margin-bottom:6px}
-.login-brand img{width:52px;height:52px;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))}
 .login-brand h1{font-family:var(--grok);font-size:1.5rem;margin:0;font-weight:700;line-height:1}
 .login-brand small{color:var(--muted);font-size:.68rem;letter-spacing:1.4px;text-transform:uppercase}
 .role-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:22px 0 18px}
@@ -82,16 +81,17 @@ select option{background:var(--panel)}
 #appView{position:relative;z-index:2}
 header.nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(10,6,8,.7);border-bottom:1px solid var(--line)}
 header.nav::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.45}
-.nav-in{max-width:var(--maxw);margin:0 auto;display:flex;align-items:center;gap:12px;padding:12px 20px}
+.nav-in{max-width:var(--maxw);margin:0 auto;display:flex;align-items:center;gap:12px;padding:12px 20px;flex-wrap:wrap}
 .nav-logo{display:flex;align-items:center;gap:10px;font-family:var(--grok);font-weight:700}
 .nav-logo img{width:34px;height:34px;object-fit:contain}
 .nav-logo small{display:block;font-weight:400;font-size:.6rem;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)}
 .nav-spacer{flex:1}
 .role-badge{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;font-weight:700;padding:5px 12px;border-radius:999px;background:rgba(165,35,56,.25);color:var(--gold-soft);border:1px solid rgba(165,35,56,.4)}
 .who{font-size:.8rem;color:var(--muted)}
-.cloud-chip{display:inline-flex;align-items:center;gap:6px;font-size:.7rem;font-weight:700;padding:5px 11px;border-radius:999px;cursor:pointer;border:1px solid var(--line)}
+.chip-nav{display:inline-flex;align-items:center;gap:6px;font-size:.7rem;font-weight:700;padding:5px 11px;border-radius:999px;cursor:pointer;border:1px solid var(--line)}
 .cloud-chip.on{background:rgba(63,191,127,.16);color:#7ee2ab;border-color:rgba(63,191,127,.4)}
 .cloud-chip.off{background:rgba(255,255,255,.04);color:var(--muted)}
+.term-chip{border-color:var(--line-gold);background:rgba(242,183,5,.06);color:var(--gold-soft)}
 main{max-width:var(--maxw);margin:0 auto;padding:26px 20px 40px}
 .eyebrow{font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-deep)}
 h2.sec{font-family:var(--grok);font-size:clamp(24px,3.6vw,40px);font-weight:600;margin:8px 0 4px;letter-spacing:-.02em;background:linear-gradient(92deg,#fff 10%,var(--gold-soft));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
@@ -202,7 +202,8 @@ table.matrix thead th{background:rgba(165,35,56,.16)}
   <header class="nav"><div class="nav-in">
     <div class="nav-logo"><div class="seal seal-k sm">K</div><img src="https://jaycarlobagayas-netizen.github.io/bpedleptresearch/images/logo-bped.png" alt="" onerror="this.style.display='none'"><div>KLabs<small>Kinetic Laboratory</small></div></div>
     <div class="nav-spacer"></div>
-    <span class="cloud-chip off" id="cloudChip"><i data-lucide="cloud-off"></i> Cloud: off</span>
+    <span class="chip-nav term-chip" id="termChip"></span>
+    <span class="chip-nav cloud-chip off" id="cloudChip"><i data-lucide="cloud-off"></i> Cloud: off</span>
     <span class="who" id="navWho"></span>
     <span class="role-badge" id="navRole"></span>
     <button class="btn btn-sm" id="logoutBtn"><i data-lucide="log-out"></i> Log out</button>
@@ -231,12 +232,13 @@ const STATIONS = [
 ];
 const RATE_LABELS={5:'Very Good',4:'Good',3:'Average',2:'Poor',1:'Very Poor'};
 const ICON={beep:'heart-pulse',stork:'footprints',situp:'dumbbell',reach:'move-vertical',pushup:'dumbbell',illinois:'route',dash:'rabbit',jump:'move-up',wall:'circle-dot',nelson:'timer'};
-const SECTIONS=[
-  {label:'Mara Cuya - C120', teacher:'Mara L. Cuya'},
-  {label:'Mara Cuya - C112', teacher:'Mara L. Cuya'},
-  {label:'Jofranco Lozano - B239', teacher:'Jofranco G. Lozano'},
-  {label:'Mussar Salamat - S123', teacher:'Mussar A. Salamat'},
+const SEED_SECTIONS=[
+  {label:'Mara Cuya - C120', teacherId:'u_mcuya'},
+  {label:'Mara Cuya - C112', teacherId:'u_mcuya'},
+  {label:'Jofranco Lozano - B239', teacherId:'u_jloz'},
+  {label:'Mussar Salamat - S123', teacherId:'u_msal'},
 ];
+const DEFAULT_TERM={ay:'2026-2027',sem:'2nd Semester'};
 const GUIDE={
   beep:{purpose:'Aerobic capacity (cardiovascular endurance).',equip:'20 m flat course, cones, beep-test audio, player.',steps:['Mark two lines 20 m apart.','Run line-to-line in time with the recorded beeps.','Each minute the beeps get faster (next level).','If you reach the line before the beep, wait for it.','A warning is given when you miss the line; eliminated on the 2nd miss.','Record the LAST level completed.']},
   stork:{purpose:'Static balance on the ball of the foot.',equip:'Flat non-slip surface, stopwatch.',steps:['Remove shoes; place hands on hips.','Put the non-supporting foot against the inside of the supporting knee.','Raise the heel to balance on the ball of the foot — start the timer.','Stop if: hands leave hips, the foot hops/moves, the raised foot leaves the knee, or the heel touches the floor.','Record the BEST of three attempts (seconds).']},
@@ -269,6 +271,14 @@ function karvonen(age,rhr){age=parseFloat(age);rhr=parseFloat(rhr);if(!age)retur
 function phaseSummary(rec,phase){const sc=(rec.scores&&rec.scores[phase])||{};const pts={};let sum=0,cnt=0;STATIONS.forEach(s=>{const r=rate(s.key,sc[s.key],rec.gender);if(r){pts[s.key]=r.points;sum+=r.points;cnt++;}});return{pts,avg:cnt?sum/cnt:0,pct:cnt?Math.round(sum/cnt/5*100):0,rating:cnt?RATE_LABELS[Math.round(sum/cnt)]:'—',filled:cnt};}
 function phaseStatus(rec,phase){const f=phaseSummary(rec,phase).filled;return f===0?'none':f>=STATIONS.length?'done':'partial';}
 
+/* ====== Section registry helpers ====== */
+function approvedSections(){return DB.sections.filter(s=>s.status==='approved');}
+function approvedSectionLabels(){return approvedSections().map(s=>s.label);}
+function sectionByLabel(l){return DB.sections.find(s=>s.label===l);}
+function sectionTeacherName(l){const s=sectionByLabel(l);if(!s||!s.teacherId)return'—';const u=DB.users.find(u=>u.id===s.teacherId);return u?u.name:'—';}
+function allSectionLabels(){const set=new Set(DB.sections.map(s=>s.label));DB.students.forEach(st=>{if(st.section&&st.section!=='Unassigned')set.add(st.section);});return[...set];}
+function pendingCount(){return DB.sections.filter(s=>s.status==='pending').length;}
+
 /* ============================================================ 2. STATISTICS ============================================================ */
 function mean(a){return a.reduce((x,y)=>x+y,0)/a.length;}
 function sd(a){if(a.length<2)return 0;const m=mean(a);return Math.sqrt(a.reduce((s,x)=>s+(x-m)*(x-m),0)/(a.length-1));}
@@ -284,16 +294,27 @@ function statBlock(res,unitLabel){if(res.insufficient)return`<p class="muted">No
 /* ============================================================ 3. DATA STORE ============================================================ */
 const KEY='bped_pft_v3';
 let DB=load();
-function load(){try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r);}catch(e){}return seed();}
+function migrate(db){
+  if(!db.norms)db.norms=JSON.parse(JSON.stringify(DEFAULT_NORMS));
+  if(!db.term)db.term=Object.assign({},DEFAULT_TERM);
+  if(!Array.isArray(db.sections)){
+    db.sections=[];const seen={};
+    (db.users||[]).filter(u=>u.role==='teacher').forEach(u=>(u.sections||[]).forEach(lab=>{if(lab&&!seen[lab]){seen[lab]=1;db.sections.push({id:uid(),label:lab,teacherId:u.id,status:'approved',term:Object.assign({},db.term),createdBy:u.id});}}));
+    (db.students||[]).forEach(s=>{if(s.section&&s.section!=='Unassigned'&&!seen[s.section]){seen[s.section]=1;db.sections.push({id:uid(),label:s.section,teacherId:null,status:'approved',term:Object.assign({},db.term),createdBy:'migration'});}});
+  }
+  return db;
+}
+function load(){try{const r=localStorage.getItem(KEY);if(r)return migrate(JSON.parse(r));}catch(e){}return seed();}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){}cloudSave();}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 function seed(){
-  const db={norms:JSON.parse(JSON.stringify(DEFAULT_NORMS)),users:[],students:[]};
+  const db={norms:JSON.parse(JSON.stringify(DEFAULT_NORMS)),term:Object.assign({},DEFAULT_TERM),users:[],students:[],sections:[]};
   db.users.push({id:'u_admin',name:'Asst. Prof. Jay Carlo S. Bagayas',email:'bped@msugensan.edu.ph',username:'admin',pass:'bped2026',role:'managerial'});
-  db.users.push({id:'u_mcuya',name:'Mara L. Cuya',email:'mcuya@msugensan.edu.ph',username:'teacher',pass:'teacher123',role:'teacher',sections:['Mara Cuya - C120','Mara Cuya - C112']});
-  db.users.push({id:'u_jloz',name:'Jofranco G. Lozano',email:'jlozano@msugensan.edu.ph',username:'jlozano',pass:'teacher123',role:'teacher',sections:['Jofranco Lozano - B239']});
-  db.users.push({id:'u_msal',name:'Mussar A. Salamat',email:'msalamat@msugensan.edu.ph',username:'msalamat',pass:'teacher123',role:'teacher',sections:['Mussar Salamat - S123']});
+  db.users.push({id:'u_mcuya',name:'Mara L. Cuya',email:'mcuya@msugensan.edu.ph',username:'teacher',pass:'teacher123',role:'teacher'});
+  db.users.push({id:'u_jloz',name:'Jofranco G. Lozano',email:'jlozano@msugensan.edu.ph',username:'jlozano',pass:'teacher123',role:'teacher'});
+  db.users.push({id:'u_msal',name:'Mussar A. Salamat',email:'msalamat@msugensan.edu.ph',username:'msalamat',pass:'teacher123',role:'teacher'});
   db.users.push({id:'u_stud',name:'Juan Dela Cruz',email:'juan@student.msugensan.edu.ph',username:'student',pass:'student123',role:'student'});
+  SEED_SECTIONS.forEach(s=>db.sections.push({id:uid(),label:s.label,teacherId:s.teacherId,status:'approved',term:Object.assign({},db.term),createdBy:'u_admin'}));
   const ppl=[
     ['Juan Dela Cruz','M',19,'juan@student.msugensan.edu.ph','Mara Cuya - C120'],
     ['Maria Santos','F',18,'maria@student.msugensan.edu.ph','Mara Cuya - C120'],
@@ -311,8 +332,7 @@ function seed(){
     const jit=base.map(v=>+(v+(Math.random()*2-1)*v*0.06).toFixed(2));
     const post=jit.map((v,i)=>+(v+(STATIONS[i].dir==='low'?-imp[i]:imp[i])).toFixed(2));
     const pre={},po={};STATIONS.forEach((s,i)=>{pre[s.key]=jit[i];po[s.key]=post[i];});
-    const teacher=(SECTIONS.find(s=>s.label===P[4])||{}).teacher;
-    const tid=({'Mara L. Cuya':'u_mcuya','Jofranco G. Lozano':'u_jloz','Mussar A. Salamat':'u_msal'})[teacher]||'u_mcuya';
+    const sec=db.sections.find(x=>x.label===P[4]);const tid=sec?sec.teacherId:'u_mcuya';
     const rec={id:idx===0?'s_demo':uid(),name:P[0],email:P[3],gender:g,age:P[2],heightM:g==='M'?1.68:1.58,weightKg:g==='M'?62:52,section:P[4],createdBy:tid,hr:{pre:{rhr:78,epr:150,rec:110},post:{rhr:72,epr:140,rec:100}},scores:{pre,post:po}};
     if(idx===1)rec.intervention={name:'HIIT_Program_Maria.txt',date:new Date().toISOString().slice(0,10),dataUrl:'data:text/plain;base64,'+btoa('Sample Intervention Program\n6-week HIIT, 3x/week.\nWeek1-2: 20s work/40s rest x8.\nWeek3-4: 30s/30s x10.\nWeek5-6: 40s/20s x12.\nFocus: cardiovascular endurance & leg power.')};
     db.students.push(rec);});
@@ -324,10 +344,10 @@ const FB_KEY='pft_fbconfig';
 let cloud={on:false,db:null,storage:null,lastTs:0};
 function getFBConfig(){try{const r=localStorage.getItem(FB_KEY);if(r){const c=JSON.parse(r);if(c&&c.apiKey&&c.projectId)return c;}}catch(e){}return null;}
 function initCloud(){const cfg=getFBConfig();if(!cfg||typeof firebase==='undefined')return;try{if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(cfg);cloud.db=firebase.firestore();try{cloud.storage=firebase.storage();}catch(e){}cloud.on=true;updateCloudChip();
-  cloud.db.collection('klabs').doc('state').onSnapshot(snap=>{const d=snap.data();if(d&&d.data&&d.ts&&d.ts!==cloud.lastTs){DB=d.data;cloud.lastTs=d.ts;try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){}rerender();}},err=>console.warn('cloud snap',err));
+  cloud.db.collection('klabs').doc('state').onSnapshot(snap=>{const d=snap.data();if(d&&d.data&&d.ts&&d.ts!==cloud.lastTs){DB=migrate(d.data);cloud.lastTs=d.ts;try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){}updateTermChip();rerender();}},err=>console.warn('cloud snap',err));
 }catch(e){console.warn('cloud init failed',e);}}
 function cloudSave(){if(!cloud.on||!cloud.db)return;cloud.lastTs=Date.now();cloud.db.collection('klabs').doc('state').set({data:DB,ts:cloud.lastTs}).catch(e=>console.warn('cloud save',e));}
-function updateCloudChip(){const c=el('cloudChip');if(!c)return;if(cloud.on){c.className='cloud-chip on';c.innerHTML='<i data-lucide="cloud"></i> Cloud: synced';}else{c.className='cloud-chip off';c.innerHTML='<i data-lucide="cloud-off"></i> Cloud: off';}icons();}
+function updateCloudChip(){const c=el('cloudChip');if(!c)return;if(cloud.on){c.className='chip-nav cloud-chip on';c.innerHTML='<i data-lucide="cloud"></i> Cloud: synced';}else{c.className='chip-nav cloud-chip off';c.innerHTML='<i data-lucide="cloud-off"></i> Cloud: off';}icons();}
 function openCloudModal(){
   const cfg=getFBConfig()||{};const isMgr=SESSION&&SESSION.role==='managerial';
   modal(`<h3 class="grok"><i data-lucide="cloud"></i> Cloud sync (Firebase)</h3>
@@ -356,16 +376,18 @@ el('liPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 el('signupToggle').addEventListener('click',openSignup);
 el('logoutBtn').addEventListener('click',logout);
 el('cloudChip').addEventListener('click',openCloudModal);
+el('termChip').addEventListener('click',openTermModal);
 function doLogin(){const u=val('liUser'),p=el('liPass').value,err=el('liErr');const user=DB.users.find(x=>x.username.toLowerCase()===u.toLowerCase()&&x.pass===p);if(!user){err.textContent='Invalid username or password.';return;}if(user.role!==loginRole){err.textContent='This is a '+user.role+' account — switch the tab above.';return;}SESSION=user;err.textContent='';enterApp();}
 function logout(){SESSION=null;el('appView').classList.add('hidden');el('loginView').classList.remove('hidden');el('liPass').value='';icons();}
 function openSignup(){
-  modal(`<h3 class="grok"><i data-lucide="user-plus"></i> Create your student account</h3><p class="sub">Students self-register and choose their section. Teacher accounts are issued by the administrator.</p>
+  const opts=approvedSectionLabels();
+  modal(`<h3 class="grok"><i data-lucide="user-plus"></i> Create your student account</h3><p class="sub">Students self-register and choose an <b>approved</b> section. Teacher accounts are issued by the administrator.</p>
   <div class="row">
     <label class="fld"><span>Full name</span><input id="suName"></label>
     <label class="fld"><span>Email</span><input id="suEmail" placeholder="name@student.edu"></label>
     <label class="fld"><span>Username</span><input id="suUser"></label>
     <label class="fld"><span>Password</span><input id="suPass" type="password"></label>
-    <label class="fld" style="grid-column:1/-1"><span>Section (permanent once created)</span><select id="suSecSel">${SECTIONS.map(s=>`<option value="${esc(s.label)}">${esc(s.label)}</option>`).join('')}</select></label>
+    <label class="fld" style="grid-column:1/-1"><span>Section (permanent once created)</span>${opts.length?`<select id="suSecSel">${opts.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('')}</select>`:`<input id="suSecSel" readonly value="No sections available yet — ask your teacher/admin">`}</label>
   </div><div class="err" id="suErr"></div>
   <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" data-close>Cancel</button><button class="btn btn-gold" id="suBtn">Create account</button></div>`);
   icons();
@@ -373,7 +395,7 @@ function openSignup(){
     const name=val('suName'),email=val('suEmail').toLowerCase(),user=val('suUser'),pass=val('suPass'),err=el('suErr');
     if(!name||!user||!pass||!email){err.textContent='All fields are required.';return;}
     if(DB.users.some(x=>x.username.toLowerCase()===user.toLowerCase())){err.textContent='Username already taken.';return;}
-    const chosen=val('suSecSel');
+    const chosen=opts.length?val('suSecSel'):'Unassigned';
     let recExisting=DB.students.find(s=>s.email&&s.email.toLowerCase()===email);
     if(!recExisting){DB.students.push({id:uid(),name,email,gender:'M',age:'',heightM:'',weightKg:'',section:chosen,createdBy:'self',hr:{pre:{},post:{}},scores:{pre:{},post:{}}});}
     else if(!recExisting.section||recExisting.section==='Unassigned'){recExisting.section=chosen;}
@@ -383,8 +405,22 @@ function openSignup(){
     toast('Account created — signing you in…');setTimeout(doLogin,300);
   };
 }
-function enterApp(){el('loginView').classList.add('hidden');el('appView').classList.remove('hidden');el('navWho').textContent=SESSION.name;el('navRole').textContent=SESSION.role;updateCloudChip();try{window.scrollTo(0,0);}catch(e){}rerender();}
+function enterApp(){el('loginView').classList.add('hidden');el('appView').classList.remove('hidden');el('navWho').textContent=SESSION.name;el('navRole').textContent=SESSION.role;updateCloudChip();updateTermChip();try{window.scrollTo(0,0);}catch(e){}rerender();}
 function rerender(){if(!SESSION)return;if(SESSION.role==='student')renderStudent();else if(SESSION.role==='teacher')renderTeacher();else renderManagerial();}
+
+/* ====== Academic term ====== */
+function updateTermChip(){const c=el('termChip');if(!c||!DB.term)return;c.innerHTML=ic('calendar-days')+' AY '+esc(DB.term.ay)+' · '+esc(DB.term.sem);icons();}
+function openTermModal(){
+  if(!SESSION)return;const isMgr=SESSION.role==='managerial';
+  modal(`<h3 class="grok"><i data-lucide="calendar-days"></i> Academic term</h3>
+  ${isMgr?`<p class="sub">Set the active Academic Year and Semester. Shown across the app and on all reports.</p>
+  <div class="row"><label class="fld"><span>Academic Year</span><input id="tmAy" value="${esc(DB.term.ay)}" placeholder="2026-2027"></label>
+  <label class="fld"><span>Semester</span><select id="tmSem"><option${DB.term.sem==='1st Semester'?' selected':''}>1st Semester</option><option${DB.term.sem==='2nd Semester'?' selected':''}>2nd Semester</option><option${DB.term.sem==='Summer'?' selected':''}>Summer</option></select></label></div>
+  <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" data-close>Cancel</button><button class="btn btn-gold" id="tmB">Save</button></div>`
+  :`<p class="muted">Academic Year <b class="gold">${esc(DB.term.ay)}</b> · <b class="gold">${esc(DB.term.sem)}</b></p><div style="display:flex;justify-content:flex-end"><button class="btn" data-close>Close</button></div>`}`);
+  icons();
+  if(isMgr){el('tmB').onclick=()=>{DB.term.ay=val('tmAy')||DB.term.ay;DB.term.sem=val('tmSem');save();closeModal();updateTermChip();toast('Academic term updated');rerender();};}
+}
 
 /* ============================================================ 6. HELPERS ============================================================ */
 function val(id){return el(id).value.trim();}
@@ -409,7 +445,7 @@ function getStudentRecord(){let r=DB.students.find(s=>s.email&&SESSION.email&&s.
 function renderStudent(){
   clearCharts();const rec=getStudentRecord();const assigned=rec.section&&rec.section!=='Unassigned';
   el('appMain').innerHTML=`
-    <div class="eyebrow">My Performance</div><h2 class="sec">Hello, ${esc(rec.name)}</h2>
+    <div class="eyebrow">My Performance · AY ${esc(DB.term.ay)} · ${esc(DB.term.sem)}</div><h2 class="sec">Hello, ${esc(rec.name)}</h2>
     <p class="sub">Section: <b class="gold">${esc(rec.section||'Unassigned')}</b> ${assigned?'· assigned &amp; permanent — only your teacher can change it':'· <span class="muted">set at sign-up / by your teacher</span>'} · ${rec.gender==='F'?'Female':'Male'} · Age ${rec.age||'—'}</p>
     <div class="tabbar">
       <div class="tab ${studTab==='dash'?'active':''}" data-st="dash">${ic('layout-dashboard')}Dashboard</div>
@@ -538,16 +574,24 @@ function studResults(rec){
 function studGuide(){el('studBody').innerHTML=`<div class="card"><h3>${ic('book-open')} How to perform each station</h3><p class="sub">Study the mechanics so pre- and post-tests are conducted consistently — the credibility of scores depends on proper execution.</p>${STATIONS.map(s=>{const G=GUIDE[s.key];return`<div class="station"><div class="station-top"><div class="name"><b>${ic(ICON[s.key])} ${s.no}. ${s.name}</b><div class="cmp">${s.comp} · unit: ${s.unit}${s.dir==='low'?' (lower is better)':''}</div></div></div><div class="guide open" style="max-height:none"><span class="tag">Purpose: ${G.purpose}</span><span class="tag">Equipment: ${G.equip}</span><ol>${G.steps.map(x=>`<li>${x}</li>`).join('')}</ol><div style="font-weight:600;color:var(--gold-soft);font-size:.74rem;text-transform:uppercase;letter-spacing:.08em;margin:6px 0 2px">Scoring matrix (${s.unit})</div>${scoringMatrix(s.key)}</div></div>`;}).join('')}</div>`;icons();}
 
 /* ============================================================ 8. TEACHER ============================================================ */
-function teacherSections(){return(SESSION.sections&&SESSION.sections.length)?SESSION.sections:['Unassigned'];}
+function teacherSections(){return DB.sections.filter(s=>s.teacherId===SESSION.id).map(s=>s.label);}
 function studentsInSection(sec){return DB.students.filter(s=>s.section===sec);}
 let activeSection=null;
 function renderTeacher(){
-  clearCharts();const secs=teacherSections();if(!activeSection||!secs.includes(activeSection))activeSection=secs[0];
-  const list=studentsInSection(activeSection),agg=sectionAggregate(list);
+  clearCharts();const secs=teacherSections();
+  if(!secs.length){
+    el('appMain').innerHTML=`<div class="eyebrow">Class Management · AY ${esc(DB.term.ay)} · ${esc(DB.term.sem)}</div><h2 class="sec">Section Monitoring</h2>
+      <div class="card"><h3>${ic('school')} No sections yet</h3><p class="sub">You have no sections assigned. Create one — it will be sent to the administrator for <b>approval</b> before students can pick it at sign-up.</p>
+      <button class="btn btn-gold" id="addSecBtn">${ic('plus')} Add a section</button></div>`;
+    el('addSecBtn').onclick=addSection;icons();return;
+  }
+  if(!activeSection||!secs.includes(activeSection))activeSection=secs[0];
+  const list=studentsInSection(activeSection),agg=sectionAggregate(list);const secObj=sectionByLabel(activeSection);
   el('appMain').innerHTML=`
-    <div class="eyebrow">Class Management</div><h2 class="sec">Section Monitoring</h2>
+    <div class="eyebrow">Class Management · AY ${esc(DB.term.ay)} · ${esc(DB.term.sem)}</div><h2 class="sec">Section Monitoring</h2>
     <p class="sub">Enrol students by email, track who completed each test, review interventions, and analyze performance.</p>
-    <div class="tabbar" id="secTabs">${secs.map(s=>`<div class="tab ${s===activeSection?'active':''}" data-sec="${esc(s)}">${ic('users')}${esc(s)} · ${studentsInSection(s).length}</div>`).join('')}<div class="tab no-print" id="addSecBtn">${ic('plus')}Add section</div></div>
+    <div class="tabbar" id="secTabs">${secs.map(s=>{const so=sectionByLabel(s);const pend=so&&so.status==='pending';return`<div class="tab ${s===activeSection?'active':''}" data-sec="${esc(s)}">${ic('users')}${esc(s)} · ${studentsInSection(s).length}${pend?` <span class="rate r3" style="margin-left:6px">pending</span>`:''}</div>`;}).join('')}<div class="tab no-print" id="addSecBtn">${ic('plus')}Add section</div></div>
+    ${secObj&&secObj.status==='pending'?`<div class="card" style="margin-bottom:16px;border-color:var(--line-gold)"><h3 style="margin:0">${ic('hourglass')} Awaiting admin approval</h3><p class="muted" style="margin:6px 0 0;font-size:.86rem">You can prepare this section now, but it won't appear in the student sign-up list until the administrator approves it.</p></div>`:''}
     <div class="cards-grid grid-4" style="margin-bottom:18px">
       ${stat(list.length,'Enrolled','users')}
       ${stat(list.filter(r=>phaseStatus(r,'pre')==='done').length+'<small>/'+list.length+'</small>','Pre-test done','clipboard-pen')}
@@ -596,7 +640,7 @@ function renderRoster(list,mountId){
   el(mountId).querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>editStudent(b.dataset.edit));
   el(mountId).querySelectorAll('[data-unreg]').forEach(b=>b.onclick=()=>{const r=DB.students.find(s=>s.id===b.dataset.unreg);if(confirm('Unregister '+r.name+' from this section? (Use this if added by mistake.)')){DB.students=DB.students.filter(s=>s.id!==b.dataset.unreg);save();rerender();}});
 }
-function addSection(){modal(`<h3 class="grok">${ic('plus')} Add a section</h3><label class="fld"><span>Section name</span><input id="newSec" placeholder="e.g. BSED-PE 1B"></label><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" data-close>Cancel</button><button class="btn btn-gold" id="newSecBtn">Add</button></div>`);el('newSecBtn').onclick=()=>{const s=val('newSec');if(!s)return;SESSION.sections=SESSION.sections||[];if(!SESSION.sections.includes(s))SESSION.sections.push(s);save();activeSection=s;closeModal();renderTeacher();};}
+function addSection(){modal(`<h3 class="grok">${ic('plus')} Add a section</h3><p class="sub">New sections are submitted to the administrator for approval before students can choose them.</p><label class="fld"><span>Section name</span><input id="newSec" placeholder="e.g. BSED-PE 1B"></label><div class="err" id="nsE"></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" data-close>Cancel</button><button class="btn btn-gold" id="newSecBtn">Submit for approval</button></div>`);el('newSecBtn').onclick=()=>{const s=val('newSec');if(!s)return;if(DB.sections.some(x=>x.label===s)){el('nsE').textContent='A section with that name already exists.';return;}DB.sections.push({id:uid(),label:s,teacherId:SESSION.id,status:'pending',term:Object.assign({},DB.term),createdBy:SESSION.id});save();activeSection=s;closeModal();toast('Section submitted for admin approval');renderTeacher();};}
 function addStudentByEmail(section){
   modal(`<h3 class="grok">${ic('user-plus')} Enrol student — ${esc(section)}</h3><p class="sub">Enrolled by email. When the student signs in with this email, this becomes their permanent section.</p>
   <div class="row">
@@ -630,18 +674,18 @@ function editStudent(id){
 /* ============================================================ 9. MANAGERIAL ============================================================ */
 let mgrTab='overview';
 function renderManagerial(){
-  clearCharts();
-  el('appMain').innerHTML=`<div class="eyebrow">Administrator</div><h2 class="sec">Managerial Console</h2>
-    <p class="sub">Oversee everything — teachers, students, enrolment, results, norms, and institution-wide reports.</p>
-    <div class="tabbar">${[['overview','layout-dashboard','Overview'],['students','users','Students'],['accounts','user-cog','Teachers & accounts'],['sections','school','Sections'],['norms','sliders-horizontal','Norms']].map(t=>`<div class="tab ${mgrTab===t[0]?'active':''}" data-mt="${t[0]}">${ic(t[1])}${t[2]}</div>`).join('')}</div><div id="mgrBody"></div>`;
+  clearCharts();const pend=pendingCount();
+  el('appMain').innerHTML=`<div class="eyebrow">Administrator · AY ${esc(DB.term.ay)} · ${esc(DB.term.sem)}</div><h2 class="sec">Managerial Console</h2>
+    <p class="sub">Oversee everything — teachers, students, enrolment, section approvals, results, norms, and reports.</p>
+    <div class="tabbar">${[['overview','layout-dashboard','Overview'],['students','users','Students'],['accounts','user-cog','Teachers & accounts'],['sections','school','Sections'+(pend?' ('+pend+')':'')],['norms','sliders-horizontal','Norms']].map(t=>`<div class="tab ${mgrTab===t[0]?'active':''}" data-mt="${t[0]}">${ic(t[1])}${t[2]}</div>`).join('')}</div><div id="mgrBody"></div>`;
   document.querySelectorAll('[data-mt]').forEach(t=>t.onclick=()=>{mgrTab=t.dataset.mt;renderManagerial();});
   ({overview:mgrOverview,students:mgrStudents,accounts:mgrAccounts,sections:mgrSections,norms:mgrNorms}[mgrTab])();icons();
 }
-function allSections(){return[...new Set(DB.students.map(s=>s.section||'Unassigned'))];}
 function mgrOverview(){
-  const all=DB.students,agg=sectionAggregate(all);
+  const all=DB.students,agg=sectionAggregate(all),pend=pendingCount();
   el('mgrBody').innerHTML=`
-    <div class="cards-grid grid-4" style="margin-bottom:18px">${stat(all.length,'Total students','users')}${stat(allSections().length,'Sections','school')}${stat(DB.users.filter(u=>u.role==='teacher').length,'Teachers','clipboard-check')}${stat((agg.postAvgPct-agg.preAvgPct>=0?'+':'')+(agg.postAvgPct-agg.preAvgPct)+'<small>%</small>','Avg gain','trending-up')}</div>
+    ${pend?`<div class="card" style="margin-bottom:16px;border-color:var(--line-gold)"><h3 style="margin:0">${ic('bell')} ${pend} section${pend>1?'s':''} awaiting approval</h3><p class="muted" style="margin:6px 0 0;font-size:.86rem">Go to the <b>Sections</b> tab to review and approve teacher-created sections.</p></div>`:''}
+    <div class="cards-grid grid-4" style="margin-bottom:18px">${stat(all.length,'Total students','users')}${stat(DB.sections.length,'Sections','school')}${stat(DB.users.filter(u=>u.role==='teacher').length,'Teachers','clipboard-check')}${stat((agg.postAvgPct-agg.preAvgPct>=0?'+':'')+(agg.postAvgPct-agg.preAvgPct)+'<small>%</small>','Avg gain','trending-up')}</div>
     <div class="cards-grid grid-2" style="margin-bottom:18px"><div class="card"><h3>${ic('radar')} Institution radar</h3><div class="chart-box"><canvas id="mRadar"></canvas></div></div><div class="card"><h3>${ic('bar-chart-3')} Avg improvement by component</h3><div class="chart-box"><canvas id="mBar"></canvas></div></div></div>
     <div class="card" style="margin-bottom:18px"><h3>${ic('flask-conical')} Institution-wide statistical analysis</h3>${classStatBlock(all)}</div>
     <div class="card"><div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap"><h3 style="flex:1;margin:0">${ic('trophy')} Top performers (post-test)</h3><button class="btn btn-sm no-print" id="repAll">${ic('file-text')} Institution report</button><button class="btn btn-sm no-print" id="csvAll">${ic('download')} Export all</button></div><div class="tbl-wrap" id="topWrap"></div></div>`;
@@ -661,13 +705,13 @@ function mgrStudents(){
   el('mgrBody').querySelectorAll('[data-iv]').forEach(b=>b.onclick=()=>viewIntervention(DB.students.find(s=>s.id===b.dataset.iv)));
   el('mgrBody').querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>editStudent(b.dataset.edit));
   el('mgrBody').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{const r=DB.students.find(s=>s.id===b.dataset.del);if(confirm('Delete '+r.name+'?')){DB.students=DB.students.filter(s=>s.id!==b.dataset.del);save();renderManagerial();}});
-  el('mAddStud').onclick=()=>addStudentByEmail(SECTIONS[0].label);el('mCsv').onclick=()=>exportCSV(all,'all_students');icons();
+  el('mAddStud').onclick=()=>addStudentByEmail(approvedSectionLabels()[0]||allSectionLabels()[0]||'Unassigned');el('mCsv').onclick=()=>exportCSV(all,'all_students');icons();
 }
 function mgrAccounts(){
   let h=`<div class="card"><div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap"><h3 style="flex:1;margin:0">${ic('user-cog')} Teachers &amp; accounts</h3><button class="btn btn-sm" id="cloudBtn">${ic('cloud')} Cloud sync</button><button class="btn btn-gold btn-sm" id="addUser">${ic('user-plus')} Add account</button></div>
     <p class="muted" style="font-size:.8rem;margin:-4px 0 12px">As administrator you issue teacher accounts here — teachers cannot self-register.</p>
     <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Username</th><th>Role</th><th>Section(s)</th><th></th></tr></thead><tbody>`;
-  DB.users.forEach(u=>{h+=`<tr><td><b>${esc(u.name)}</b></td><td class="muted" style="font-size:.78rem">${esc(u.email||'—')}</td><td>${esc(u.username)}</td><td><span class="rate ${u.role==='managerial'?'r1':u.role==='teacher'?'r4':'r3'}">${u.role}</span></td><td>${esc((u.sections||[]).join(', ')||'—')}</td><td>${u.id!=='u_admin'?`<button class="iconbtn" data-deluser="${u.id}" title="Remove">${ic('trash-2')}</button>`:'<span class="muted">—</span>'}</td></tr>`;});
+  DB.users.forEach(u=>{const secs=u.role==='teacher'?DB.sections.filter(s=>s.teacherId===u.id).map(s=>s.label).join(', '):'—';h+=`<tr><td><b>${esc(u.name)}</b></td><td class="muted" style="font-size:.78rem">${esc(u.email||'—')}</td><td>${esc(u.username)}</td><td><span class="rate ${u.role==='managerial'?'r1':u.role==='teacher'?'r4':'r3'}">${u.role}</span></td><td class="muted" style="font-size:.8rem">${esc(secs||'—')}</td><td>${u.id!=='u_admin'?`<button class="iconbtn" data-deluser="${u.id}" title="Remove">${ic('trash-2')}</button>`:'<span class="muted">—</span>'}</td></tr>`;});
   el('mgrBody').innerHTML=h+'</tbody></table></div></div>';
   el('addUser').onclick=openAccountModal;el('cloudBtn').onclick=openCloudModal;
   el('mgrBody').querySelectorAll('[data-deluser]').forEach(b=>b.onclick=()=>{if(confirm('Remove this account?')){DB.users=DB.users.filter(u=>u.id!==b.dataset.deluser);save();renderManagerial();}});icons();
@@ -681,16 +725,43 @@ function openAccountModal(){
     <label class="fld"><span>Password</span><input id="auPass"></label>
     <label class="fld"><span>Section</span><input id="auSec" placeholder="teacher: section handled / student: enrolled"></label></div>
     <div class="err" id="auErr"></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" data-close>Cancel</button><button class="btn btn-gold" id="auBtn">Create</button></div>`);
-  el('auBtn').onclick=()=>{const name=val('auName'),role=val('auRole'),email=val('auEmail'),user=val('auUser'),pass=val('auPass'),sec=val('auSec');if(!name||!user||!pass){el('auErr').textContent='Name, username and password are required.';return;}if(DB.users.some(u=>u.username.toLowerCase()===user.toLowerCase())){el('auErr').textContent='Username taken.';return;}const nu={id:uid(),name,email,username:user,pass,role};if(role==='teacher')nu.sections=[sec||'Unassigned'];if(role==='student'&&email&&!DB.students.some(s=>s.email&&s.email.toLowerCase()===email.toLowerCase()))DB.students.push({id:uid(),name,email,gender:'M',age:'',heightM:'',weightKg:'',section:sec||'Unassigned',createdBy:nu.id,hr:{pre:{},post:{}},scores:{pre:{},post:{}}});DB.users.push(nu);save();closeModal();renderManagerial();};
+  el('auBtn').onclick=()=>{const name=val('auName'),role=val('auRole'),email=val('auEmail'),user=val('auUser'),pass=val('auPass'),sec=val('auSec');if(!name||!user||!pass){el('auErr').textContent='Name, username and password are required.';return;}if(DB.users.some(u=>u.username.toLowerCase()===user.toLowerCase())){el('auErr').textContent='Username taken.';return;}const nu={id:uid(),name,email,username:user,pass,role};
+    if(role==='teacher'&&sec&&!DB.sections.some(s=>s.label===sec))DB.sections.push({id:uid(),label:sec,teacherId:nu.id,status:'approved',term:Object.assign({},DB.term),createdBy:SESSION.id});
+    if(role==='student'&&email&&!DB.students.some(s=>s.email&&s.email.toLowerCase()===email.toLowerCase()))DB.students.push({id:uid(),name,email,gender:'M',age:'',heightM:'',weightKg:'',section:sec||'Unassigned',createdBy:nu.id,hr:{pre:{},post:{}},scores:{pre:{},post:{}}});
+    DB.users.push(nu);save();closeModal();renderManagerial();};
 }
+function teacherOptions(sel){return DB.users.filter(u=>u.role==='teacher').map(u=>`<option value="${u.id}"${u.id===sel?' selected':''}>${esc(u.name)}</option>`).join('')||'<option value="">(no teachers yet)</option>';}
 function mgrSections(){
-  let h=`<div class="card"><h3>${ic('school')} All sections</h3><div class="tbl-wrap"><table><thead><tr><th>Section</th><th>Teacher</th><th>Enrolled</th><th>Pre done</th><th>Post done</th><th>Avg pre</th><th>Avg post</th><th>Gain</th><th></th></tr></thead><tbody>`;
-  allSections().forEach(sec=>{const list=studentsInSection(sec),a=sectionAggregate(list);const teacher=(SECTIONS.find(x=>x.label===sec)||{}).teacher||(DB.users.find(u=>u.sections&&u.sections.includes(sec))||{}).name||'—';
-    h+=`<tr><td><b>${esc(sec)}</b></td><td class="muted" style="font-size:.8rem">${esc(teacher)}</td><td>${list.length}</td><td>${list.filter(r=>phaseStatus(r,'pre')==='done').length}</td><td>${list.filter(r=>phaseStatus(r,'post')==='done').length}</td><td>${a.preAvgPct}%</td><td>${a.postAvgPct}%</td><td><b style="color:${a.postAvgPct-a.preAvgPct>=0?'var(--ok)':'var(--bad)'}">${a.postAvgPct-a.preAvgPct>=0?'+':''}${a.postAvgPct-a.preAvgPct}%</b></td><td style="white-space:nowrap"><button class="iconbtn" data-enr="${esc(sec)}" title="View enrolled">${ic('users')}</button> <button class="iconbtn" data-rep="${esc(sec)}" title="Report">${ic('file-text')}</button></td></tr>`;});
+  const pend=pendingCount();
+  let h=`<div class="card"><div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center"><h3 style="flex:1;margin:0">${ic('school')} Sections &amp; approval</h3>
+    <span class="chip-nav term-chip" style="cursor:default">${ic('calendar-days')} AY ${esc(DB.term.ay)} · ${esc(DB.term.sem)}</span>
+    <button class="btn btn-sm" id="editTerm">${ic('pencil')} Edit term</button>
+    <button class="btn btn-gold btn-sm" id="addSec">${ic('plus')} Add section</button></div>
+    ${pend?`<p style="font-size:.84rem;margin:-4px 0 12px"><span class="rate r3">${pend} pending</span> &nbsp;section${pend>1?'s':''} awaiting your approval.</p>`:''}
+    <div class="tbl-wrap"><table><thead><tr><th>Section</th><th>Teacher</th><th>Term</th><th>Status</th><th>Enrolled</th><th>Pre</th><th>Post</th><th>Avg gain</th><th>Actions</th></tr></thead><tbody>`;
+  if(!DB.sections.length)h+=`<tr><td colspan="9" class="muted" style="text-align:center;padding:20px">No sections yet. Click “Add section”.</td></tr>`;
+  DB.sections.slice().sort((a,b)=>(a.status==='pending'?0:1)-(b.status==='pending'?0:1)).forEach(sec=>{const list=studentsInSection(sec.label),a=sectionAggregate(list);const tName=sec.teacherId?((DB.users.find(u=>u.id===sec.teacherId)||{}).name||'—'):'—';const t=sec.term||DB.term;
+    h+=`<tr><td><b>${esc(sec.label)}</b></td><td class="muted" style="font-size:.8rem">${esc(tName)}</td><td class="muted" style="font-size:.76rem">${esc(t.sem)} ${esc(t.ay)}</td>
+      <td>${sec.status==='approved'?`<span class="rate r5">approved</span>`:`<span class="rate r3">pending</span>`}</td>
+      <td>${list.length}</td><td>${list.filter(r=>phaseStatus(r,'pre')==='done').length}</td><td>${list.filter(r=>phaseStatus(r,'post')==='done').length}</td>
+      <td><b style="color:${a.postAvgPct-a.preAvgPct>=0?'var(--ok)':'var(--bad)'}">${a.postAvgPct-a.preAvgPct>=0?'+':''}${a.postAvgPct-a.preAvgPct}%</b></td>
+      <td style="white-space:nowrap">${sec.status==='pending'?`<button class="iconbtn" data-approve="${sec.id}" title="Approve">${ic('check')}</button> `:''}<button class="iconbtn" data-reassign="${sec.id}" title="Reassign teacher">${ic('user-cog')}</button> <button class="iconbtn" data-enr="${esc(sec.label)}" title="View enrolled">${ic('users')}</button> <button class="iconbtn" data-rep="${esc(sec.label)}" title="Report">${ic('file-text')}</button> <button class="iconbtn" data-delsec="${sec.id}" title="Delete">${ic('trash-2')}</button></td></tr>`;});
   el('mgrBody').innerHTML=h+'</tbody></table></div></div>';
+  el('editTerm').onclick=openTermModal;el('addSec').onclick=openAddSectionAdmin;
+  el('mgrBody').querySelectorAll('[data-approve]').forEach(b=>b.onclick=()=>{const s=DB.sections.find(x=>x.id===b.dataset.approve);s.status='approved';save();toast('Section approved');renderManagerial();});
+  el('mgrBody').querySelectorAll('[data-delsec]').forEach(b=>b.onclick=()=>{const s=DB.sections.find(x=>x.id===b.dataset.delsec);if(confirm('Delete section "'+s.label+'" from the registry? Enrolled students keep their records.')){DB.sections=DB.sections.filter(x=>x.id!==b.dataset.delsec);save();renderManagerial();}});
+  el('mgrBody').querySelectorAll('[data-reassign]').forEach(b=>b.onclick=()=>openReassign(b.dataset.reassign));
   el('mgrBody').querySelectorAll('[data-rep]').forEach(b=>b.onclick=()=>printStatReport('Section '+b.dataset.rep,studentsInSection(b.dataset.rep)));
   el('mgrBody').querySelectorAll('[data-enr]').forEach(b=>b.onclick=()=>showEnrolled(b.dataset.enr));icons();
 }
+function openAddSectionAdmin(){
+  modal(`<h3 class="grok">${ic('plus')} Add section</h3><div class="row">
+   <label class="fld"><span>Section label</span><input id="nsLabel" placeholder="e.g. BSED-PE 2A"></label>
+   <label class="fld"><span>Assign teacher</span><select id="nsTeach">${teacherOptions()}</select></label></div>
+   <div class="err" id="nsErr"></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" data-close>Cancel</button><button class="btn btn-gold" id="nsBtn">Create (approved)</button></div>`);
+  el('nsBtn').onclick=()=>{const lab=val('nsLabel');if(!lab){el('nsErr').textContent='Section label is required.';return;}if(DB.sections.some(s=>s.label===lab)){el('nsErr').textContent='Section already exists.';return;}DB.sections.push({id:uid(),label:lab,teacherId:val('nsTeach')||null,status:'approved',term:Object.assign({},DB.term),createdBy:SESSION.id});save();closeModal();toast('Section created');renderManagerial();};
+}
+function openReassign(id){const s=DB.sections.find(x=>x.id===id);if(!s)return;modal(`<h3 class="grok">${ic('user-cog')} Reassign — ${esc(s.label)}</h3><label class="fld"><span>Teacher</span><select id="raT">${teacherOptions(s.teacherId)}</select></label><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" data-close>Cancel</button><button class="btn btn-gold" id="raB">Save</button></div>`);el('raB').onclick=()=>{s.teacherId=val('raT')||null;save();closeModal();toast('Teacher reassigned');renderManagerial();};}
 function showEnrolled(sec){const list=studentsInSection(sec);
   modal(`<h3 class="grok">${ic('users')} Enrolled — ${esc(sec)} (${list.length})</h3>
     <div class="tbl-wrap" style="max-height:60vh"><table><thead><tr><th>Name</th><th>Email</th><th>Sex</th><th>Pre</th><th>Post</th><th>Result</th></tr></thead><tbody>
@@ -707,9 +778,10 @@ function mgrNorms(){
 }
 
 /* ============================================================ 10. EXPORT / REPORTS ============================================================ */
+function termLine(){return DB.term?('AY '+DB.term.ay+' · '+DB.term.sem):'';}
 function csv(s){s=(s==null?'':String(s));return/[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}
 function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href);}
-function exportCSV(list,fname){const head=['Name','Email','Sex','Age','Height_m','Weight_kg','BMI','Section'];STATIONS.forEach(s=>head.push(s.short+'_pre',s.short+'_preRemark',s.short+'_post',s.short+'_postRemark'));head.push('Pre_%','Post_%','Gain_%','Intervention');const rows=[head.join(',')];list.forEach(rec=>{const p=phaseSummary(rec,'pre'),q=phaseSummary(rec,'post'),bmi=bmiOf(rec.heightM,rec.weightKg);const r=[csv(rec.name),csv(rec.email),rec.gender,rec.age,rec.heightM,rec.weightKg,bmi?bmi.toFixed(1):'',csv(rec.section)];STATIONS.forEach(s=>{const pv=(rec.scores.pre||{})[s.key],qv=(rec.scores.post||{})[s.key];r.push(pv!=null?pv:'',p.pts[s.key]!=null?RATE_LABELS[p.pts[s.key]]:'',qv!=null?qv:'',q.pts[s.key]!=null?RATE_LABELS[q.pts[s.key]]:'');});r.push(p.filled?p.pct:'',q.filled?q.pct:'',(p.filled&&q.filled)?q.pct-p.pct:'',rec.intervention?'Yes':'No');rows.push(r.join(','));});dl(new Blob([rows.join('\n')],{type:'text/csv'}),(fname||'pft')+'.csv');toast('CSV exported');}
+function exportCSV(list,fname){const head=['Name','Email','Sex','Age','Height_m','Weight_kg','BMI','Section','AcademicYear','Semester'];STATIONS.forEach(s=>head.push(s.short+'_pre',s.short+'_preRemark',s.short+'_post',s.short+'_postRemark'));head.push('Pre_%','Post_%','Gain_%','Intervention');const rows=[head.join(',')];list.forEach(rec=>{const p=phaseSummary(rec,'pre'),q=phaseSummary(rec,'post'),bmi=bmiOf(rec.heightM,rec.weightKg);const r=[csv(rec.name),csv(rec.email),rec.gender,rec.age,rec.heightM,rec.weightKg,bmi?bmi.toFixed(1):'',csv(rec.section),csv(DB.term.ay),csv(DB.term.sem)];STATIONS.forEach(s=>{const pv=(rec.scores.pre||{})[s.key],qv=(rec.scores.post||{})[s.key];r.push(pv!=null?pv:'',p.pts[s.key]!=null?RATE_LABELS[p.pts[s.key]]:'',qv!=null?qv:'',q.pts[s.key]!=null?RATE_LABELS[q.pts[s.key]]:'');});r.push(p.filled?p.pct:'',q.filled?q.pct:'',(p.filled&&q.filled)?q.pct-p.pct:'',rec.intervention?'Yes':'No');rows.push(r.join(','));});dl(new Blob([rows.join('\n')],{type:'text/csv'}),(fname||'pft')+'.csv');toast('CSV exported');}
 function downloadResult(rec,showSig){
   if(!rec)return;const p=phaseSummary(rec,'pre'),q=phaseSummary(rec,'post'),bmi=bmiOf(rec.heightM,rec.weightKg);const k=karvonen(rec.age,(rec.hr&&rec.hr.post&&rec.hr.post.rhr)||(rec.hr&&rec.hr.pre&&rec.hr.pre.rhr));
   const res=pairedT(STATIONS.map(s=>p.pts[s.key]!=null?p.pts[s.key]:null),STATIONS.map(s=>q.pts[s.key]!=null?q.pts[s.key]:null));
@@ -718,11 +790,11 @@ function downloadResult(rec,showSig){
   const win=window.open('','_blank');if(!win){toast('Allow pop-ups to download the report');return;}
   win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>KLabs Result — ${esc(rec.name)}</title><style>body{font-family:Georgia,serif;color:#1a1a1a;max-width:800px;margin:24px auto;padding:0 20px}h1{font-size:20px;border-bottom:3px solid #6b1320;padding-bottom:8px;color:#6b1320}.brand{color:#c8960a;font-weight:bold;letter-spacing:1px}.meta{font-size:13px;color:#444;margin:8px 0 16px}.sum{display:flex;gap:14px;margin:14px 0}.box{flex:1;border:1px solid #ccc;border-radius:8px;padding:10px;text-align:center}.box b{font-size:22px;color:#6b1320;display:block}table{width:100%;border-collapse:collapse;font-size:12.5px;margin:10px 0}th,td{border:1px solid #ccc;padding:6px 8px;text-align:left}th{background:#6b1320;color:#ffd95e}.stat{font-size:12.5px;background:#faf6ef;border:1px solid #e6dcc8;border-radius:8px;padding:10px;margin-top:6px}@media print{.np{display:none}}</style></head><body>
   <h1><span class="brand">KLabs</span> — BPED Physical Fitness Test · Individual Result</h1>
-  <div class="meta"><b>${esc(rec.name)}</b> | ${rec.gender==='F'?'Female':'Male'} | Age ${rec.age||'—'} | ${esc(rec.section||'')} | ${esc(rec.email||'')}<br>Height ${rec.heightM||'—'} m · Weight ${rec.weightKg||'—'} kg · BMI ${bmi?bmi.toFixed(1)+' ('+bmiClass(bmi)+')':'—'} · MHR ${k?k.mhr:'—'} bpm</div>
+  <div class="meta"><b>${esc(rec.name)}</b> | ${rec.gender==='F'?'Female':'Male'} | Age ${rec.age||'—'} | ${esc(rec.section||'')} | ${esc(rec.email||'')}<br>${esc(termLine())} · Height ${rec.heightM||'—'} m · Weight ${rec.weightKg||'—'} kg · BMI ${bmi?bmi.toFixed(1)+' ('+bmiClass(bmi)+')':'—'} · MHR ${k?k.mhr:'—'} bpm</div>
   <div class="sum"><div class="box"><b>${p.pct}%</b>Pre-test (${p.rating})</div><div class="box"><b>${q.pct}%</b>Post-test (${q.rating})</div><div class="box"><b>${(p.filled&&q.filled)?(q.pct-p.pct>=0?'+':'')+(q.pct-p.pct)+'%':'—'}</b>Improvement</div></div>
   <table><thead><tr><th>Station</th><th>Component</th><th>Pre</th><th>Pre remark</th><th>Post</th><th>Post remark</th><th>Change</th></tr></thead><tbody>${rowsHtml}</tbody></table>
   ${showSig?`<div class="stat"><b>Scientific analysis.</b> ${statTxt}</div>`:''}
-  <p style="font-size:11px;color:#777;margin-top:10px">Generated by KLabs (Kinetic Laboratory) · BPED · MSU–General Santos · Developed by JCB.</p>
+  <p style="font-size:11px;color:#777;margin-top:10px">Generated by KLabs (Kinetic Laboratory) · BPED · MSU–General Santos · Developed by JCB · ${esc(termLine())}.</p>
   <button class="np" onclick="window.print()" style="padding:10px 18px;background:#6b1320;color:#ffd95e;border:none;border-radius:8px;cursor:pointer;font-size:14px">Save as PDF / Print</button></body></html>`);win.document.close();
 }
 function printStatReport(title,list){
@@ -733,7 +805,7 @@ function printStatReport(title,list){
   const win=window.open('','_blank');if(!win){toast('Allow pop-ups to print the report');return;}
   win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>KLabs · ${esc(title)} — Statistical Report</title><style>body{font-family:Georgia,serif;max-width:820px;margin:24px auto;padding:0 20px;color:#1a1a1a}h1{color:#6b1320;border-bottom:3px solid #6b1320;padding-bottom:8px;font-size:20px}.brand{color:#c8960a;letter-spacing:1px}h2{color:#6b1320;font-size:15px;margin-top:20px}table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px}th,td{border:1px solid #ccc;padding:6px 8px}th{background:#6b1320;color:#ffd95e}.stat{font-size:13px;background:#faf6ef;border:1px solid #e6dcc8;border-radius:8px;padding:12px;line-height:1.6}</style></head><body>
   <h1><span class="brand">KLabs</span> — ${esc(title)} · Physical Fitness Test Report</h1>
-  <p>Students: <b>${list.length}</b> · Paired (pre &amp; post): <b>${pre.length}</b> · Avg pre <b>${preM.toFixed(1)}%</b> · Avg post <b>${postM.toFixed(1)}%</b> · Avg gain <b>${(postM-preM>=0?'+':'')+(postM-preM).toFixed(1)}%</b></p>
+  <p>${esc(termLine())} · Students: <b>${list.length}</b> · Paired (pre &amp; post): <b>${pre.length}</b> · Avg pre <b>${preM.toFixed(1)}%</b> · Avg post <b>${postM.toFixed(1)}%</b> · Avg gain <b>${(postM-preM>=0?'+':'')+(postM-preM).toFixed(1)}%</b></p>
   <h2>Inferential statistics</h2><div class="stat">${statTxt}</div>
   <h2>Mean rating by component (1–5)</h2><table><thead><tr><th>Component</th><th>Pre (M)</th><th>Post (M)</th><th>Change</th></tr></thead><tbody>${compRows}</tbody></table>
   <h2>Enrolled roster</h2><table><thead><tr><th>Name</th><th>Email</th><th>Sex</th><th>Pre %</th><th>Post %</th><th>Gain</th></tr></thead><tbody>${list.map(r=>{const p=phaseSummary(r,'pre'),q=phaseSummary(r,'post');return`<tr><td>${esc(r.name)}</td><td>${esc(r.email||'')}</td><td>${r.gender}</td><td>${p.filled?p.pct+'%':'—'}</td><td>${q.filled?q.pct+'%':'—'}</td><td>${(p.filled&&q.filled)?((q.pct-p.pct>=0?'+':'')+(q.pct-p.pct)+'%'):'—'}</td></tr>`;}).join('')}</tbody></table>
