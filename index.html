@@ -24,6 +24,7 @@
   --radius:22px; --maxw:1280px;
   --grok:'Space Grotesk',sans-serif; --display:'Syncopate',sans-serif;
   --ok:#3fbf7f; --warn:#f2b705; --bad:#e0563f;
+  --red:#ff3b30; --neon:#39ff14;
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -50,12 +51,11 @@ svg.lucide{width:1.05em;height:1.05em;stroke-width:2.1;vertical-align:-.17em}
 .btn-maroon{background:linear-gradient(135deg,var(--maroon-bright),var(--maroon));color:#fff;border:none}
 .btn-ghost{background:transparent}
 .btn-sm{padding:6px 11px;font-size:.78rem;border-radius:9px}
-.pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line-gold);border-radius:999px;padding:6px 14px;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);background:rgba(242,183,5,.05)}
 label.fld{display:block;margin-bottom:12px}
 label.fld span{display:block;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;font-weight:600}
 input,select,textarea{width:100%;font:inherit;font-size:.92rem;background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:11px;padding:10px 12px;transition:border-color .2s}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
-input[readonly]{opacity:.65;cursor:not-allowed}
+input[readonly],input:disabled,select:disabled{opacity:.6;cursor:not-allowed}
 select option{background:var(--panel)}
 .seal{width:52px;height:52px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--gold-soft),var(--gold) 55%,var(--gold-deep));display:grid;place-items:center;color:var(--maroon-deep);font-weight:900;font-size:1.3rem;border:2px solid var(--gold-soft);flex-shrink:0;box-shadow:0 6px 18px rgba(242,183,5,.28)}
 .seal-k{font-family:var(--grok);font-weight:800;letter-spacing:-1px}
@@ -78,6 +78,7 @@ select option{background:var(--panel)}
 .demo-box{margin-top:16px;font-size:.72rem;color:var(--muted);background:var(--bg);border:1px solid var(--line);border-radius:11px;padding:10px 12px}
 .demo-box b{color:var(--gold-soft)}
 .err{color:#ff8a73;font-size:.8rem;margin-top:8px;min-height:18px}
+.linkbtn{background:none;border:none;color:var(--gold-soft);cursor:pointer;font:inherit;font-size:.8rem;text-decoration:underline;padding:4px}
 #appView{position:relative;z-index:2}
 header.nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(10,6,8,.7);border-bottom:1px solid var(--line)}
 header.nav::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.45}
@@ -148,6 +149,13 @@ table.matrix thead th{background:rgba(165,35,56,.16)}
 .sig{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:700;font-size:.72rem}
 .sig.yes{background:rgba(63,191,127,.18);color:#7ee2ab;border:1px solid rgba(63,191,127,.4)}
 .sig.no{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--line)}
+.banner{display:flex;gap:12px;align-items:flex-start;background:linear-gradient(160deg,rgba(242,183,5,.08),var(--panel));border:1px solid var(--line-gold);border-radius:14px;padding:14px 16px;margin-bottom:14px}
+.banner svg.lucide{color:var(--gold);flex-shrink:0;margin-top:1px}
+.banner b{color:var(--gold-soft)}
+.bmibox{display:flex;gap:14px;flex-wrap:wrap}
+.bmibox .b{flex:1;min-width:120px;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+.bmibox .b .v{font-family:var(--grok);font-size:1.5rem;font-weight:700;color:var(--gold)}
+.bmibox .b .l{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-top:4px}
 .modal-bg{position:fixed;inset:0;background:rgba(5,3,4,.7);backdrop-filter:blur(4px);z-index:100;display:grid;place-items:center;padding:20px}
 .modal{width:min(780px,100%);max-height:92vh;overflow:auto;background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line-gold);border-radius:var(--radius);padding:26px}
 .modal h3{font-family:var(--grok);margin:0 0 6px;font-size:1.2rem}
@@ -159,6 +167,7 @@ table.matrix thead th{background:rgba(165,35,56,.16)}
 .chip.done{background:rgba(63,191,127,.16);color:#7ee2ab;border:1px solid rgba(63,191,127,.4)}
 .chip.partial{background:rgba(242,183,5,.14);color:var(--gold-soft);border:1px solid var(--line-gold)}
 .chip.none{background:rgba(255,255,255,.04);color:var(--muted);border:1px solid var(--line)}
+.chip.lock{background:rgba(165,35,56,.18);color:#ff8aa0;border:1px solid rgba(165,35,56,.4)}
 .dropzone{border:1px dashed var(--line-gold);border-radius:14px;padding:24px;text-align:center;background:rgba(242,183,5,.03);cursor:pointer}
 .dropzone:hover{background:rgba(242,183,5,.06)}
 .iconbtn{border:1px solid var(--line);background:var(--panel-2);color:var(--text);border-radius:8px;padding:5px 8px;cursor:pointer;display:inline-flex;align-items:center}
@@ -189,10 +198,13 @@ table.matrix thead th{background:rgba(165,35,56,.16)}
     <label class="fld"><span>Password</span><input id="liPass" type="password" autocomplete="current-password" placeholder="••••••••"></label>
     <div class="err" id="liErr"></div>
     <button class="btn btn-gold" style="width:100%;padding:13px;justify-content:center" id="liBtn"><i data-lucide="log-in"></i> Sign in</button>
-    <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:8px;justify-content:center" id="signupToggle">New student? Create your account</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+      <button class="linkbtn" id="signupToggle">New student? Create account</button>
+      <button class="linkbtn" id="forgotToggle">Forgot password?</button>
+    </div>
     <div class="divider">licensed access</div>
     <button class="gplay" title="Available soon on Google Play"><i data-lucide="play"></i> Get access on Google Play <span class="badge-soon">soon</span></button>
-    <p class="note">Full access will be granted to verified purchasers via the Google Play Store. Teacher accounts are issued by the administrator.</p>
+    <p class="note">Accounts require a <b>@msugensan.edu.ph</b> email. Teacher accounts are issued by the administrator.</p>
     <div class="demo-box"><b>Demo logins</b><br>Student — <b>student</b> / student123 &nbsp;·&nbsp; Teacher — <b>teacher</b> / teacher123 &nbsp;·&nbsp; Managerial — <b>admin</b> / bped2026</div>
   </div>
 </section>
@@ -232,6 +244,8 @@ const STATIONS = [
 ];
 const RATE_LABELS={5:'Very Good',4:'Good',3:'Average',2:'Poor',1:'Very Poor'};
 const ICON={beep:'heart-pulse',stork:'footprints',situp:'dumbbell',reach:'move-vertical',pushup:'dumbbell',illinois:'route',dash:'rabbit',jump:'move-up',wall:'circle-dot',nelson:'timer'};
+const EMAIL_DOMAIN='@msugensan.edu.ph';
+function validDomain(e){return typeof e==='string'&&e.toLowerCase().trim().endsWith(EMAIL_DOMAIN);}
 const SEED_SECTIONS=[
   {label:'Mara Cuya - C120', teacherId:'u_mcuya'},
   {label:'Mara Cuya - C112', teacherId:'u_mcuya'},
@@ -267,15 +281,18 @@ function rate(key,value,gender){if(value===''||value==null||isNaN(value))return 
 function scoringMatrix(key){const n=DB.norms[key],op=n.dir==='high'?'≥':'≤',last=n.dir==='high'?'<':'>',idx={5:0,4:1,3:2,2:3};const cell=(a,p)=>p===1?(last+' '+a[3]):(op+' '+a[idx[p]]);let r='';[5,4,3,2,1].forEach(p=>{r+=`<tr><td><span class="${rcls(p)}">${RATE_LABELS[p]}</span></td><td>${cell(n.M,p)}</td><td>${cell(n.F,p)}</td></tr>`;});return`<table class="matrix"><thead><tr><th>Remark</th><th>Male</th><th>Female</th></tr></thead><tbody>${r}</tbody></table>`;}
 function bmiOf(h,w){h=parseFloat(h);w=parseFloat(w);if(!h||!w)return null;return w/(h*h);}
 function bmiClass(b){if(b==null)return'';if(b<18.5)return'Underweight';if(b<25)return'Normal';if(b<30)return'Overweight';return'Obese';}
+function recBMI(rec,phase){const m=(rec.measure&&rec.measure[phase])||{};return bmiOf(m.h,m.w);}
+function recBMIany(rec){return recBMI(rec,'post')||recBMI(rec,'pre')||(rec.heightM?bmiOf(rec.heightM,rec.weightKg):null);}
 function karvonen(age,rhr){age=parseFloat(age);rhr=parseFloat(rhr);if(!age)return null;const mhr=220-age,hrr=rhr?mhr-rhr:null,z=p=>hrr!=null?Math.round(hrr*p+rhr):null;return{mhr,hrr,zones:{z60:[z(.6),z(.7)],z70:[z(.7),z(.8)],z80:[z(.8),z(.9)],z90:[z(.9),z(1)]}};}
 function phaseSummary(rec,phase){const sc=(rec.scores&&rec.scores[phase])||{};const pts={};let sum=0,cnt=0;STATIONS.forEach(s=>{const r=rate(s.key,sc[s.key],rec.gender);if(r){pts[s.key]=r.points;sum+=r.points;cnt++;}});return{pts,avg:cnt?sum/cnt:0,pct:cnt?Math.round(sum/cnt/5*100):0,rating:cnt?RATE_LABELS[Math.round(sum/cnt)]:'—',filled:cnt};}
 function phaseStatus(rec,phase){const f=phaseSummary(rec,phase).filled;return f===0?'none':f>=STATIONS.length?'done':'partial';}
+function isLocked(rec,phase){return!!(rec.lock&&rec.lock[phase]);}
+function pendingReqFor(rec,phase){return DB.editRequests.find(r=>r.studentId===rec.id&&r.phase===phase&&r.status==='pending');}
 
 /* ====== Section registry helpers ====== */
 function approvedSections(){return DB.sections.filter(s=>s.status==='approved');}
 function approvedSectionLabels(){return approvedSections().map(s=>s.label);}
 function sectionByLabel(l){return DB.sections.find(s=>s.label===l);}
-function sectionTeacherName(l){const s=sectionByLabel(l);if(!s||!s.teacherId)return'—';const u=DB.users.find(u=>u.id===s.teacherId);return u?u.name:'—';}
 function allSectionLabels(){const set=new Set(DB.sections.map(s=>s.label));DB.students.forEach(st=>{if(st.section&&st.section!=='Unassigned')set.add(st.section);});return[...set];}
 function pendingCount(){return DB.sections.filter(s=>s.status==='pending').length;}
 
@@ -297,34 +314,37 @@ let DB=load();
 function migrate(db){
   if(!db.norms)db.norms=JSON.parse(JSON.stringify(DEFAULT_NORMS));
   if(!db.term)db.term=Object.assign({},DEFAULT_TERM);
+  if(!Array.isArray(db.editRequests))db.editRequests=[];
   if(!Array.isArray(db.sections)){
     db.sections=[];const seen={};
     (db.users||[]).filter(u=>u.role==='teacher').forEach(u=>(u.sections||[]).forEach(lab=>{if(lab&&!seen[lab]){seen[lab]=1;db.sections.push({id:uid(),label:lab,teacherId:u.id,status:'approved',term:Object.assign({},db.term),createdBy:u.id});}}));
     (db.students||[]).forEach(s=>{if(s.section&&s.section!=='Unassigned'&&!seen[s.section]){seen[s.section]=1;db.sections.push({id:uid(),label:s.section,teacherId:null,status:'approved',term:Object.assign({},db.term),createdBy:'migration'});}});
   }
+  (db.students||[]).forEach(s=>{if(!s.measure){s.measure={pre:{h:s.heightM||'',w:s.weightKg||''},post:{h:s.heightM||'',w:s.weightKg||''}};}if(!s.lock)s.lock={};});
   return db;
 }
 function load(){try{const r=localStorage.getItem(KEY);if(r)return migrate(JSON.parse(r));}catch(e){}return seed();}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){}cloudSave();}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function randPass(){return Math.random().toString(36).slice(2,8)+Math.floor(10+Math.random()*89);}
 function seed(){
-  const db={norms:JSON.parse(JSON.stringify(DEFAULT_NORMS)),term:Object.assign({},DEFAULT_TERM),users:[],students:[],sections:[]};
+  const db={norms:JSON.parse(JSON.stringify(DEFAULT_NORMS)),term:Object.assign({},DEFAULT_TERM),users:[],students:[],sections:[],editRequests:[]};
   db.users.push({id:'u_admin',name:'Asst. Prof. Jay Carlo S. Bagayas',email:'bped@msugensan.edu.ph',username:'admin',pass:'bped2026',role:'managerial'});
   db.users.push({id:'u_mcuya',name:'Mara L. Cuya',email:'mcuya@msugensan.edu.ph',username:'teacher',pass:'teacher123',role:'teacher'});
   db.users.push({id:'u_jloz',name:'Jofranco G. Lozano',email:'jlozano@msugensan.edu.ph',username:'jlozano',pass:'teacher123',role:'teacher'});
   db.users.push({id:'u_msal',name:'Mussar A. Salamat',email:'msalamat@msugensan.edu.ph',username:'msalamat',pass:'teacher123',role:'teacher'});
-  db.users.push({id:'u_stud',name:'Juan Dela Cruz',email:'juan@student.msugensan.edu.ph',username:'student',pass:'student123',role:'student'});
+  db.users.push({id:'u_stud',name:'Juan Dela Cruz',email:'juan.delacruz@msugensan.edu.ph',username:'student',pass:'student123',role:'student'});
   SEED_SECTIONS.forEach(s=>db.sections.push({id:uid(),label:s.label,teacherId:s.teacherId,status:'approved',term:Object.assign({},db.term),createdBy:'u_admin'}));
   const ppl=[
-    ['Juan Dela Cruz','M',19,'juan@student.msugensan.edu.ph','Mara Cuya - C120'],
-    ['Maria Santos','F',18,'maria@student.msugensan.edu.ph','Mara Cuya - C120'],
-    ['Pedro Reyes','M',20,'pedro@student.msugensan.edu.ph','Mara Cuya - C120'],
-    ['Andrea Lim','F',19,'andrea@student.msugensan.edu.ph','Mara Cuya - C120'],
-    ['Mark Villamor','M',18,'mark@student.msugensan.edu.ph','Mara Cuya - C112'],
-    ['Bea Tolentino','F',20,'bea@student.msugensan.edu.ph','Mara Cuya - C112'],
-    ['Carlo Aquino','M',19,'carlo@student.msugensan.edu.ph','Jofranco Lozano - B239'],
-    ['Liza Bautista','F',18,'liza@student.msugensan.edu.ph','Jofranco Lozano - B239'],
-    ['Noel Cruz','M',21,'noel@student.msugensan.edu.ph','Mussar Salamat - S123'],
+    ['Juan Dela Cruz','M',19,'juan.delacruz@msugensan.edu.ph','Mara Cuya - C120'],
+    ['Maria Santos','F',18,'maria.santos@msugensan.edu.ph','Mara Cuya - C120'],
+    ['Pedro Reyes','M',20,'pedro.reyes@msugensan.edu.ph','Mara Cuya - C120'],
+    ['Andrea Lim','F',19,'andrea.lim@msugensan.edu.ph','Mara Cuya - C120'],
+    ['Mark Villamor','M',18,'mark.villamor@msugensan.edu.ph','Mara Cuya - C112'],
+    ['Bea Tolentino','F',20,'bea.tolentino@msugensan.edu.ph','Mara Cuya - C112'],
+    ['Carlo Aquino','M',19,'carlo.aquino@msugensan.edu.ph','Jofranco Lozano - B239'],
+    ['Liza Bautista','F',18,'liza.bautista@msugensan.edu.ph','Jofranco Lozano - B239'],
+    ['Noel Cruz','M',21,'noel.cruz@msugensan.edu.ph','Mussar Salamat - S123'],
   ];
   const malePre=[9,38,40,21,28,17.4,8.2,52,28,0.24],femPre=[8,42,34,22,26,19.0,9.1,44,27,0.25];
   const impM=[2,8,8,3,7,0.9,0.6,9,5,0.04],impF=[2,7,6,3,6,1.0,0.7,8,4,0.04];
@@ -333,7 +353,10 @@ function seed(){
     const post=jit.map((v,i)=>+(v+(STATIONS[i].dir==='low'?-imp[i]:imp[i])).toFixed(2));
     const pre={},po={};STATIONS.forEach((s,i)=>{pre[s.key]=jit[i];po[s.key]=post[i];});
     const sec=db.sections.find(x=>x.label===P[4]);const tid=sec?sec.teacherId:'u_mcuya';
-    const rec={id:idx===0?'s_demo':uid(),name:P[0],email:P[3],gender:g,age:P[2],heightM:g==='M'?1.68:1.58,weightKg:g==='M'?62:52,section:P[4],createdBy:tid,hr:{pre:{rhr:78,epr:150,rec:110},post:{rhr:72,epr:140,rec:100}},scores:{pre,post:po}};
+    const H=g==='M'?1.68:1.58,W=g==='M'?62:52,Wp=g==='M'?60:50;
+    const rec={id:idx===0?'s_demo':uid(),name:P[0],email:P[3],gender:g,age:P[2],section:P[4],createdBy:tid,
+      measure:{pre:{h:H,w:W},post:{h:H,w:Wp}},lock:{},
+      hr:{pre:{rhr:78,epr:150,rec:110},post:{rhr:72,epr:140,rec:100}},scores:{pre,post:po}};
     if(idx===1)rec.intervention={name:'HIIT_Program_Maria.txt',date:new Date().toISOString().slice(0,10),dataUrl:'data:text/plain;base64,'+btoa('Sample Intervention Program\n6-week HIIT, 3x/week.\nWeek1-2: 20s work/40s rest x8.\nWeek3-4: 30s/30s x10.\nWeek5-6: 40s/20s x12.\nFocus: cardiovascular endurance & leg power.')};
     db.students.push(rec);});
   return db;
@@ -374,6 +397,7 @@ el('roleTabs').addEventListener('click',e=>{const t=e.target.closest('.role-tab'
 el('liBtn').addEventListener('click',doLogin);
 el('liPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 el('signupToggle').addEventListener('click',openSignup);
+el('forgotToggle').addEventListener('click',openForgot);
 el('logoutBtn').addEventListener('click',logout);
 el('cloudChip').addEventListener('click',openCloudModal);
 el('termChip').addEventListener('click',openTermModal);
@@ -381,10 +405,10 @@ function doLogin(){const u=val('liUser'),p=el('liPass').value,err=el('liErr');co
 function logout(){SESSION=null;el('appView').classList.add('hidden');el('loginView').classList.remove('hidden');el('liPass').value='';icons();}
 function openSignup(){
   const opts=approvedSectionLabels();
-  modal(`<h3 class="grok"><i data-lucide="user-plus"></i> Create your student account</h3><p class="sub">Students self-register and choose an <b>approved</b> section. Teacher accounts are issued by the administrator.</p>
+  modal(`<h3 class="grok"><i data-lucide="user-plus"></i> Create your student account</h3><p class="sub">Students self-register with a <b>@msugensan.edu.ph</b> email and choose an <b>approved</b> section. Teacher accounts are issued by the administrator.</p>
   <div class="row">
     <label class="fld"><span>Full name</span><input id="suName"></label>
-    <label class="fld"><span>Email</span><input id="suEmail" placeholder="name@student.edu"></label>
+    <label class="fld"><span>Email (@msugensan.edu.ph)</span><input id="suEmail" placeholder="name@msugensan.edu.ph"></label>
     <label class="fld"><span>Username</span><input id="suUser"></label>
     <label class="fld"><span>Password</span><input id="suPass" type="password"></label>
     <label class="fld" style="grid-column:1/-1"><span>Section (permanent once created)</span>${opts.length?`<select id="suSecSel">${opts.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('')}</select>`:`<input id="suSecSel" readonly value="No sections available yet — ask your teacher/admin">`}</label>
@@ -394,15 +418,36 @@ function openSignup(){
   el('suBtn').onclick=()=>{
     const name=val('suName'),email=val('suEmail').toLowerCase(),user=val('suUser'),pass=val('suPass'),err=el('suErr');
     if(!name||!user||!pass||!email){err.textContent='All fields are required.';return;}
+    if(!validDomain(email)){err.textContent='Email must be a '+EMAIL_DOMAIN+' address.';return;}
     if(DB.users.some(x=>x.username.toLowerCase()===user.toLowerCase())){err.textContent='Username already taken.';return;}
+    if(DB.users.some(x=>x.email&&x.email.toLowerCase()===email)){err.textContent='An account with that email already exists.';return;}
     const chosen=opts.length?val('suSecSel'):'Unassigned';
     let recExisting=DB.students.find(s=>s.email&&s.email.toLowerCase()===email);
-    if(!recExisting){DB.students.push({id:uid(),name,email,gender:'M',age:'',heightM:'',weightKg:'',section:chosen,createdBy:'self',hr:{pre:{},post:{}},scores:{pre:{},post:{}}});}
+    if(!recExisting){DB.students.push({id:uid(),name,email,gender:'M',age:'',section:chosen,createdBy:'self',measure:{pre:{},post:{}},lock:{},hr:{pre:{},post:{}},scores:{pre:{},post:{}}});}
     else if(!recExisting.section||recExisting.section==='Unassigned'){recExisting.section=chosen;}
     DB.users.push({id:uid(),name,email,username:user,pass,role:'student'});save();closeModal();
     el('liUser').value=user;el('liPass').value=pass;
     document.querySelectorAll('.role-tab').forEach(x=>x.classList.toggle('active',x.dataset.role==='student'));loginRole='student';
     toast('Account created — signing you in…');setTimeout(doLogin,300);
+  };
+}
+function openForgot(){
+  modal(`<h3 class="grok"><i data-lucide="key-round"></i> Reset student password</h3><p class="sub">Enter your <b>@msugensan.edu.ph</b> email. A new temporary password will be generated and emailed to you.</p>
+  <label class="fld"><span>Email</span><input id="fpEmail" placeholder="name@msugensan.edu.ph"></label>
+  <div class="err" id="fpErr"></div><div id="fpOut"></div>
+  <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" data-close>Close</button><button class="btn btn-gold" id="fpBtn">Send recovery</button></div>`);
+  icons();
+  el('fpBtn').onclick=()=>{
+    const email=val('fpEmail').toLowerCase(),err=el('fpErr');err.textContent='';
+    if(!validDomain(email)){err.textContent='Use your '+EMAIL_DOMAIN+' email.';return;}
+    const u=DB.users.find(x=>x.role==='student'&&x.email&&x.email.toLowerCase()===email);
+    if(!u){err.textContent='No student account found for that email.';return;}
+    const np=randPass();u.pass=np;save();
+    const subject=encodeURIComponent('KLabs password recovery');
+    const body=encodeURIComponent('Hello '+u.name+',\n\nYour KLabs temporary password is: '+np+'\nUsername: '+u.username+'\n\nPlease sign in and change it.\n\n— KLabs (Kinetic Laboratory)');
+    try{window.open('mailto:'+u.email+'?subject='+subject+'&body='+body);}catch(e){}
+    el('fpOut').innerHTML=`<div class="banner" style="margin-top:10px">${ic('mail-check')}<div><b>Recovery generated.</b><p style="margin:4px 0 0;font-size:.84rem">A reset email was opened for <b>${esc(u.email)}</b>. Temporary password: <b class="gold">${np}</b><br><span class="muted">Prototype note: real delivery needs an email backend (Firebase Auth / EmailJS).</span></p></div></div>`;
+    icons();
   };
 }
 function enterApp(){el('loginView').classList.add('hidden');el('appView').classList.remove('hidden');el('navWho').textContent=SESSION.name;el('navRole').textContent=SESSION.role;updateCloudChip();updateTermChip();try{window.scrollTo(0,0);}catch(e){}rerender();}
@@ -432,16 +477,18 @@ function icons(){if(typeof lucide!=='undefined'){try{lucide.createIcons();}catch
 function stat(num,lbl,icon){return`<div class="stat">${icon?`<span class="ico">${ic(icon)}</span>`:''}<div class="num grok">${num}</div><div class="lbl">${lbl}</div></div>`;}
 function modal(html){closeModal();const d=document.createElement('div');d.className='modal-bg';d.id='modalBg';d.innerHTML='<div class="modal">'+html+'</div>';d.addEventListener('mousedown',e=>{if(e.target===d)closeModal();});document.body.appendChild(d);d.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeModal);icons();}
 function closeModal(){const m=el('modalBg');if(m)m.remove();}
-function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2200);}
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2600);}
 let CHARTS=[];function clearCharts(){CHARTS.forEach(c=>{try{c.destroy();}catch(e){}});CHARTS=[];}
-function radarChart(cv,pre,post){if(typeof Chart==='undefined'||!cv)return;const labels=STATIONS.map(s=>s.short);const ds=[{label:'Pre-test',data:STATIONS.map(s=>pre&&pre[s.key]!=null?pre[s.key]:0),fill:true,backgroundColor:'rgba(165,35,56,.22)',borderColor:'#a52338',pointBackgroundColor:'#a52338',borderWidth:2}];if(post)ds.push({label:'Post-test',data:STATIONS.map(s=>post[s.key]!=null?post[s.key]:0),fill:true,backgroundColor:'rgba(242,183,5,.18)',borderColor:'#f2b705',pointBackgroundColor:'#ffd95e',borderWidth:2});CHARTS.push(new Chart(cv,{type:'radar',data:{labels,datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#f6efe6',font:{family:"'Space Grotesk'"}}}},scales:{r:{min:0,max:5,ticks:{stepSize:1,color:'#80706a',backdropColor:'transparent'},grid:{color:'rgba(255,255,255,.08)'},angleLines:{color:'rgba(255,255,255,.08)'},pointLabels:{color:'#f6efe6',font:{size:11,family:"'Space Grotesk'"}}}}}}));}
+function radarDatasets(pre,post,forImage){const red=forImage?'#e0322b':'#ff3b30',green=forImage?'#16a34a':'#39ff14';const ds=[{label:'Pre-test',data:STATIONS.map(s=>pre&&pre[s.key]!=null?pre[s.key]:0),fill:true,backgroundColor:'rgba(255,59,48,.20)',borderColor:red,pointBackgroundColor:red,borderWidth:2}];if(post)ds.push({label:'Post-test',data:STATIONS.map(s=>post[s.key]!=null?post[s.key]:0),fill:true,backgroundColor:'rgba(57,255,20,.18)',borderColor:green,pointBackgroundColor:green,borderWidth:2});return ds;}
+function radarChart(cv,pre,post){if(typeof Chart==='undefined'||!cv)return;CHARTS.push(new Chart(cv,{type:'radar',data:{labels:STATIONS.map(s=>s.short),datasets:radarDatasets(pre,post,false)},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#f6efe6',font:{family:"'Space Grotesk'"}}}},scales:{r:{min:0,max:5,ticks:{stepSize:1,color:'#80706a',backdropColor:'transparent'},grid:{color:'rgba(255,255,255,.08)'},angleLines:{color:'rgba(255,255,255,.08)'},pointLabels:{color:'#f6efe6',font:{size:11,family:"'Space Grotesk'"}}}}}}));}
+function radarImage(pre,post){if(typeof Chart==='undefined')return'';try{const c=document.createElement('canvas');c.width=460;c.height=380;const ch=new Chart(c,{type:'radar',data:{labels:STATIONS.map(s=>s.short),datasets:radarDatasets(pre,post,true)},options:{responsive:false,animation:false,plugins:{legend:{labels:{color:'#222',font:{size:12}}}},scales:{r:{min:0,max:5,ticks:{stepSize:1,color:'#666',backdropColor:'transparent'},grid:{color:'#ccc'},angleLines:{color:'#ccc'},pointLabels:{color:'#222',font:{size:11}}}}}});let url='';try{url=c.toDataURL('image/png');}catch(e){}ch.destroy();return url;}catch(e){return'';}}
 function barChart(cv,labels,data){if(typeof Chart==='undefined'||!cv)return;const colors=data.map(v=>v>0?'#3fbf7f':v<0?'#e0563f':'#80706a');CHARTS.push(new Chart(cv,{type:'bar',data:{labels,datasets:[{data,backgroundColor:colors,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#b3a39c',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#80706a',stepSize:1},grid:{color:'rgba(255,255,255,.06)'}}}}}));}
 function statusChip(st,n){const map={done:['done','check-check','Complete'],partial:['partial','loader','Partial '+n+'/'+STATIONS.length],none:['none','minus','Not started']};const[c,i,t]=map[st];return`<span class="chip ${c}">${ic(i)} ${t}</span>`;}
 function unitAbbr(s){return({level:'lvl',seconds:'s',repetitions:'reps',centimeters:'cm',catches:'catches'})[s.unit]||'';}
 
 /* ============================================================ 7. STUDENT ============================================================ */
 let studTab='dash';
-function getStudentRecord(){let r=DB.students.find(s=>s.email&&SESSION.email&&s.email.toLowerCase()===SESSION.email.toLowerCase());if(!r){r={id:uid(),name:SESSION.name,email:SESSION.email||'',gender:'M',age:'',heightM:'',weightKg:'',section:'Unassigned',createdBy:SESSION.id,hr:{pre:{},post:{}},scores:{pre:{},post:{}}};DB.students.push(r);save();}return r;}
+function getStudentRecord(){let r=DB.students.find(s=>s.email&&SESSION.email&&s.email.toLowerCase()===SESSION.email.toLowerCase());if(!r){r={id:uid(),name:SESSION.name,email:SESSION.email||'',gender:'M',age:'',section:'Unassigned',createdBy:SESSION.id,measure:{pre:{},post:{}},lock:{},hr:{pre:{},post:{}},scores:{pre:{},post:{}}};DB.students.push(r);save();}if(!r.measure)r.measure={pre:{},post:{}};if(!r.lock)r.lock={};return r;}
 function renderStudent(){
   clearCharts();const rec=getStudentRecord();const assigned=rec.section&&rec.section!=='Unassigned';
   el('appMain').innerHTML=`
@@ -460,7 +507,7 @@ function renderStudent(){
   icons();
 }
 function studDash(rec){
-  const pre=phaseSummary(rec,'pre'),post=phaseSummary(rec,'post'),bmi=bmiOf(rec.heightM,rec.weightKg);
+  const pre=phaseSummary(rec,'pre'),post=phaseSummary(rec,'post'),bmi=recBMIany(rec);
   el('studBody').innerHTML=`
     <div class="cards-grid grid-4" style="margin-bottom:18px">
       ${stat(pre.pct+'<small>%</small>','Pre-test','clipboard-pen')}
@@ -469,46 +516,53 @@ function studDash(rec){
       ${stat(bmi?bmi.toFixed(1):'—','BMI'+(bmi?' · '+bmiClass(bmi):''),'scale')}
     </div>
     <div class="cards-grid grid-2">
-      <div class="card"><h3>${ic('radar')} Fitness profile</h3><div class="chart-box"><canvas id="cRadar"></canvas></div><p class="muted" style="font-size:.74rem;margin-top:8px">Rating scale 1 (Very Poor) → 5 (Very Good) per component.</p></div>
+      <div class="card"><h3>${ic('radar')} Fitness profile</h3><div class="chart-box"><canvas id="cRadar"></canvas></div><p class="muted" style="font-size:.74rem;margin-top:8px"><b style="color:var(--red)">Red</b> = pre-test · <b style="color:#2bd40f">Neon green</b> = post-test · scale 1→5.</p></div>
       <div class="card"><h3>${ic('list-checks')} Completion</h3>
-        <p style="margin:.2rem 0">Pre-test: ${statusChip(phaseStatus(rec,'pre'),pre.filled)} &nbsp; Post-test: ${statusChip(phaseStatus(rec,'post'),post.filled)}</p>
+        <p style="margin:.2rem 0">Pre-test: ${statusChip(phaseStatus(rec,'pre'),pre.filled)} ${isLocked(rec,'pre')?`<span class="chip lock">${ic('lock')} locked</span>`:''}</p>
+        <p style="margin:.2rem 0">Post-test: ${statusChip(phaseStatus(rec,'post'),post.filled)} ${isLocked(rec,'post')?`<span class="chip lock">${ic('lock')} locked</span>`:''}</p>
         <p style="margin:.4rem 0">Intervention: ${rec.intervention?`<span class="chip done">${ic('paperclip')} Submitted</span>`:`<span class="chip none">${ic('minus')} None</span>`}</p>
-        <p class="muted" style="font-size:.85rem;margin-top:10px">Enter raw scores under <b>Pre-test</b> / <b>Post-test</b> — each station shows how to perform it and its scoring matrix, and converts your score to a remark instantly. Upload your training plan under <b>Intervention</b>, then view your three results under <b>Results</b>.</p>
+        <p class="muted" style="font-size:.85rem;margin-top:10px">Saving a test <b>locks</b> it. To fix a mistaken entry, open the test and tap <b>Request correction</b> — your teacher approves it to unlock.</p>
       </div>
     </div>`;
   radarChart(el('cRadar'),pre.pts,post.filled?post.pts:null);
 }
 function studPhase(rec,phase){
-  const sc=(rec.scores&&rec.scores[phase])||{},hr=(rec.hr&&rec.hr[phase])||{};
+  const sc=(rec.scores&&rec.scores[phase])||{},hr=(rec.hr&&rec.hr[phase])||{},mz=(rec.measure&&rec.measure[phase])||{};
+  const locked=isLocked(rec,phase);const ro=locked?'readonly':'';const dis=locked?'disabled':'';
+  const pend=pendingReqFor(rec,phase);
   let rows='';
   STATIONS.forEach(s=>{const v=sc[s.key]!=null?sc[s.key]:'',r=rate(s.key,v,rec.gender);
     rows+=`<div class="station"><div class="station-top">
       <div class="name"><b>${ic(ICON[s.key])} ${s.no}. ${s.name}</b><div class="cmp">${s.comp} · unit: ${s.unit}${s.dir==='low'?' (lower is better)':''}</div></div>
       <button class="info-btn" data-guide="${s.key}">${ic('info')} How to perform</button>
-      <div class="inp"><input type="number" step="0.01" data-k="${s.key}" value="${v}" placeholder="${s.unit}"></div>
+      <div class="inp"><input type="number" step="0.01" data-k="${s.key}" value="${v}" placeholder="${s.unit}" ${ro}></div>
       <div class="rm" id="rm_${s.key}">${r?`<span class="${rcls(r.points)}">${r.label}</span>`:'<span class="rate r0">—</span>'}</div>
     </div><div class="guide" id="g_${s.key}"></div></div>`;});
   el('studBody').innerHTML=`
+    ${locked?`<div class="banner">${ic('lock')}<div><b>This ${phase}-test is locked.</b> ${pend?'A correction request is <b>awaiting teacher approval</b>.':'You submitted it already. To edit a mistaken entry, request a correction below.'}</div></div>`:''}
     <div class="card" style="margin-bottom:16px"><h3>${ic('user')} Profile</h3>
       <div class="row">
-        <label class="fld"><span>Name</span><input id="pfName" value="${esc(rec.name||'')}"></label>
-        <label class="fld"><span>Gender</span><select id="pfGender"><option value="M"${rec.gender!=='F'?' selected':''}>Male</option><option value="F"${rec.gender==='F'?' selected':''}>Female</option></select></label>
-        <label class="fld"><span>Age</span><input id="pfAge" type="number" value="${rec.age||''}"></label>
-        <label class="fld"><span>Height (m)</span><input id="pfH" type="number" step="0.01" value="${rec.heightM||''}"></label>
-        <label class="fld"><span>Weight (kg)</span><input id="pfW" type="number" step="0.1" value="${rec.weightKg||''}"></label>
-        <label class="fld"><span>Section (locked)</span><input value="${esc(rec.section||'Unassigned')}" readonly title="Set at sign-up / by your teacher — cannot be changed"></label>
+        <label class="fld"><span>Name</span><input id="pfName" value="${esc(rec.name||'')}" ${ro}></label>
+        <label class="fld"><span>Gender</span><select id="pfGender" ${dis}><option value="M"${rec.gender!=='F'?' selected':''}>Male</option><option value="F"${rec.gender==='F'?' selected':''}>Female</option></select></label>
+        <label class="fld"><span>Age</span><input id="pfAge" type="number" value="${rec.age||''}" ${ro}></label>
+        <label class="fld"><span>Section (locked)</span><input value="${esc(rec.section||'Unassigned')}" readonly title="Set at sign-up / by your teacher"></label>
       </div>
     </div>
+    <div class="card" style="margin-bottom:16px"><h3>${ic('scale')} Body measurement — ${phase}</h3>
+      <div class="row" style="margin-bottom:4px">
+        <label class="fld"><span>Height (m)</span><input id="mH" type="number" step="0.01" value="${mz.h!=null?mz.h:''}" ${ro}></label>
+        <label class="fld"><span>Weight (kg)</span><input id="mW" type="number" step="0.1" value="${mz.w!=null?mz.w:''}" ${ro}></label>
+      </div><div id="bmiOut" class="muted" style="font-size:.86rem"></div></div>
     <div class="card" style="margin-bottom:16px"><h3>${ic(phase==='pre'?'clipboard-pen':'clipboard-check')} ${phase==='pre'?'PRE-TEST':'POST-TEST'} scorecard <span class="badge-soon" style="background:var(--maroon-deep)">${phase}</span></h3>
       <p class="sub" style="margin-bottom:14px">Type each raw score — the remark transmutes automatically using the official PFT norms. Tap “How to perform” for instructions and the scoring matrix.</p>${rows}</div>
     <div class="card" style="margin-bottom:16px"><h3>${ic('heart-pulse')} Heart rate &amp; target zones — ${phase}</h3>
       <div class="row" style="margin-bottom:6px">
-        <label class="fld"><span>Resting HR (bpm)</span><input id="hrR" type="number" value="${hr.rhr!=null?hr.rhr:''}"></label>
-        <label class="fld"><span>Exercise HR (bpm)</span><input id="hrE" type="number" value="${hr.epr!=null?hr.epr:''}"></label>
-        <label class="fld"><span>Recovery HR (3 min)</span><input id="hrC" type="number" value="${hr.rec!=null?hr.rec:''}"></label>
+        <label class="fld"><span>Resting HR (bpm)</span><input id="hrR" type="number" value="${hr.rhr!=null?hr.rhr:''}" ${ro}></label>
+        <label class="fld"><span>Exercise HR (bpm)</span><input id="hrE" type="number" value="${hr.epr!=null?hr.epr:''}" ${ro}></label>
+        <label class="fld"><span>Recovery HR (3 min)</span><input id="hrC" type="number" value="${hr.rec!=null?hr.rec:''}" ${ro}></label>
       </div><div id="hrOut" class="muted" style="font-size:.84rem"></div></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn btn-gold" id="savePhase">${ic('save')} Save ${phase}-test</button>
+      ${locked?(pend?`<button class="btn" disabled>${ic('hourglass')} Correction requested</button>`:`<button class="btn btn-maroon" id="reqFix">${ic('pencil')} Request correction</button>`):`<button class="btn btn-gold" id="savePhase">${ic('save')} Save ${phase}-test</button>`}
       <button class="btn" id="gotoResults">${ic('trending-up')} View results</button>
     </div>`;
   icons();
@@ -516,11 +570,20 @@ function studPhase(rec,phase){
   const gsel=el('pfGender');
   function setRem(inp){const r=rate(inp.dataset.k,inp.value,gsel.value);el('rm_'+inp.dataset.k).innerHTML=r?`<span class="${rcls(r.points)}">${r.label}</span>`:'<span class="rate r0">—</span>';}
   document.querySelectorAll('#studBody input[data-k]').forEach(inp=>inp.addEventListener('input',()=>setRem(inp)));
-  gsel.addEventListener('change',()=>document.querySelectorAll('#studBody input[data-k]').forEach(setRem));
+  if(gsel&&!locked)gsel.addEventListener('change',()=>document.querySelectorAll('#studBody input[data-k]').forEach(setRem));
+  function refreshBMI(){const b=bmiOf(el('mH').value,el('mW').value);el('bmiOut').innerHTML=b?`BMI <b class="gold">${b.toFixed(1)}</b> — ${bmiClass(b)}`:'Enter height and weight for BMI.';}
+  el('mH').addEventListener('input',refreshBMI);el('mW').addEventListener('input',refreshBMI);refreshBMI();
   function refreshHR(){const k=karvonen(val('pfAge'),el('hrR').value);el('hrOut').innerHTML=k?`MHR <b class="gold">${k.mhr}</b> bpm · HRR <b class="gold">${k.hrr!=null?k.hrr:'—'}</b> bpm${k.hrr!=null?` — THR: Low <b>${k.zones.z60[0]}–${k.zones.z60[1]}</b> · Moderate <b>${k.zones.z70[0]}–${k.zones.z70[1]}</b> · High <b>${k.zones.z80[0]}–${k.zones.z80[1]}</b> · Very High <b>${k.zones.z90[0]}–${k.zones.z90[1]}</b> bpm`:' — enter resting HR for zones.'}`:'Enter age + resting HR for target zones.';}
   el('hrR').addEventListener('input',refreshHR);el('pfAge').addEventListener('input',refreshHR);refreshHR();
-  el('savePhase').onclick=()=>{rec.name=val('pfName')||rec.name;rec.gender=val('pfGender');rec.age=val('pfAge');rec.heightM=val('pfH');rec.weightKg=val('pfW');rec.scores=rec.scores||{};rec.scores[phase]=rec.scores[phase]||{};document.querySelectorAll('#studBody input[data-k]').forEach(inp=>{if(inp.value==='')delete rec.scores[phase][inp.dataset.k];else rec.scores[phase][inp.dataset.k]=parseFloat(inp.value);});rec.hr=rec.hr||{};rec.hr[phase]={rhr:el('hrR').value,epr:el('hrE').value,rec:el('hrC').value};save();toast(phase+'-test saved');};
+  if(!locked&&el('savePhase'))el('savePhase').onclick=()=>{rec.name=val('pfName')||rec.name;rec.gender=val('pfGender');rec.age=val('pfAge');rec.measure=rec.measure||{};rec.measure[phase]={h:el('mH').value,w:el('mW').value};rec.scores=rec.scores||{};rec.scores[phase]=rec.scores[phase]||{};document.querySelectorAll('#studBody input[data-k]').forEach(inp=>{if(inp.value==='')delete rec.scores[phase][inp.dataset.k];else rec.scores[phase][inp.dataset.k]=parseFloat(inp.value);});rec.hr=rec.hr||{};rec.hr[phase]={rhr:el('hrR').value,epr:el('hrE').value,rec:el('hrC').value};rec.lock=rec.lock||{};rec.lock[phase]=true;save();toast(phase+'-test saved & locked');renderStudent();};
+  if(locked&&el('reqFix'))el('reqFix').onclick=()=>requestCorrection(rec,phase);
   el('gotoResults').onclick=()=>{studTab='results';renderStudent();};
+}
+function requestCorrection(rec,phase){
+  modal(`<h3 class="grok">${ic('pencil')} Request ${phase}-test correction</h3><p class="sub">Tell your teacher what you need to fix. They will approve it to unlock this test for editing.</p>
+  <label class="fld"><span>Reason</span><textarea id="rcReason" rows="3" placeholder="e.g. I entered my push-up count in the wrong row."></textarea></label>
+  <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" data-close>Cancel</button><button class="btn btn-gold" id="rcBtn">Submit request</button></div>`);
+  el('rcBtn').onclick=()=>{DB.editRequests.push({id:uid(),studentId:rec.id,studentName:rec.name,section:rec.section,phase,reason:val('rcReason'),status:'pending',date:new Date().toISOString().slice(0,10)});save();closeModal();toast('Correction request sent to your teacher');renderStudent();};
 }
 function studInterv(rec){
   const iv=rec.intervention;
@@ -545,24 +608,26 @@ function uploadIntervention(rec,file,errEl){
   const r=new FileReader();r.onload=()=>{meta.dataUrl=r.result;rec.intervention=meta;save();toast('Intervention saved');renderStudent();};r.readAsDataURL(file);
 }
 function viewIntervention(rec){const iv=rec&&rec.intervention;if(!iv){toast('No intervention submitted');return;}const src=iv.url||iv.dataUrl;if(!src){toast('File unavailable');return;}const w=window.open();if(w){if(iv.url){w.location=iv.url;}else{w.document.write(`<iframe src="${iv.dataUrl}" style="border:0;width:100%;height:100vh"></iframe>`);}}else toast('Allow pop-ups to view the file');}
+function bmiCell(rec,phase){const b=recBMI(rec,phase);return b?`<div class="b"><div class="v">${b.toFixed(1)}</div><div class="l">${phase}-test · ${bmiClass(b)}</div></div>`:`<div class="b"><div class="v">—</div><div class="l">${phase}-test BMI</div></div>`;}
 function studResults(rec){
   const pre=phaseSummary(rec,'pre'),post=phaseSummary(rec,'post');
   const pctChange=(pre.filled&&post.filled&&pre.pct>0)?Math.round((post.pct-pre.pct)/pre.pct*100):null;
-  let resultRows='';STATIONS.forEach(s=>{const pv=(rec.scores.pre||{})[s.key],qv=(rec.scores.post||{})[s.key],pr=pre.pts[s.key],qr=post.pts[s.key],d=(pr!=null&&qr!=null)?qr-pr:null;
-    resultRows+=`<tr><td><b>${s.no}. ${s.comp}</b><div class="muted" style="font-size:.72rem">${s.name}</div></td><td>${pv!=null?pv+' '+unitAbbr(s):'—'}</td><td>${pr?`<span class="${rcls(pr)}">${RATE_LABELS[pr]}</span>`:'—'}</td><td>${qv!=null?qv+' '+unitAbbr(s):'—'}</td><td>${qr?`<span class="${rcls(qr)}">${RATE_LABELS[qr]}</span>`:'—'}</td><td>${d==null?'—':`<b style="color:${d>0?'var(--ok)':d<0?'var(--bad)':'var(--muted)'}">${d>0?'▲ +'+d:d<0?'▼ '+d:'▬ 0'}</b>`}</td></tr>`;});
+  const bPre=recBMI(rec,'pre'),bPost=recBMI(rec,'post');const bChange=(bPre!=null&&bPost!=null)?(bPost-bPre):null;
+  let impRows='';STATIONS.forEach(s=>{const pr=pre.pts[s.key],qr=post.pts[s.key],d=(pr!=null&&qr!=null)?qr-pr:null;impRows+=`<tr><td><b>${s.no}. ${s.comp}</b></td><td>${pr?RATE_LABELS[pr]:'—'}</td><td>${qr?RATE_LABELS[qr]:'—'}</td><td>${d==null?'—':`<b style="color:${d>0?'var(--ok)':d<0?'var(--bad)':'var(--muted)'}">${d>0?'▲ +'+d:d<0?'▼ '+d:'▬ 0'}</b>`}</td></tr>`;});
   el('studBody').innerHTML=`
     <div class="cards-grid grid-3" style="margin-bottom:18px">
       <div class="card"><h3>${ic('clipboard-pen')} 1 · Pre-test</h3><div class="num grok" style="font-size:2rem">${pre.filled?pre.pct+'%':'—'}</div><div class="lbl muted" style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em">${pre.filled?pre.rating:'no data'} · ${pre.filled}/${STATIONS.length} stations</div></div>
       <div class="card"><h3>${ic('clipboard-check')} 2 · Post-test</h3><div class="num grok" style="font-size:2rem">${post.filled?post.pct+'%':'—'}</div><div class="lbl muted" style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em">${post.filled?post.rating:'no data'} · ${post.filled}/${STATIONS.length} stations</div></div>
       <div class="card" style="border-color:var(--line-gold)"><h3>${ic('trending-up')} 3 · Improvement</h3><div class="num grok" style="font-size:2rem;color:${post.pct-pre.pct>=0?'var(--ok)':'var(--bad)'}">${(post.filled&&pre.filled)?(post.pct-pre.pct>=0?'+':'')+(post.pct-pre.pct)+'%':'—'}</div><div class="lbl muted" style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em">overall (${pre.pct}% → ${post.pct}%)</div>${pctChange!=null?`<p class="muted" style="font-size:.82rem;margin-top:8px">Relative gain: <b class="gold">${pctChange>=0?'+':''}${pctChange}%</b> vs pre-test.</p>`:''}</div>
     </div>
-    <div class="cards-grid grid-2" style="margin-bottom:18px">
-      <div class="card"><h3>${ic('radar')} Pre vs Post</h3><div class="chart-box"><canvas id="rRadar"></canvas></div></div>
-      <div class="card"><h3>${ic('bar-chart-3')} Component improvement</h3><div class="chart-box"><canvas id="rBar"></canvas></div></div>
-    </div>
-    <div class="card"><h3>${ic('table')} Detailed result</h3>
-      <div class="tbl-wrap"><table><thead><tr><th>Component</th><th>Pre score</th><th>Pre remark</th><th>Post score</th><th>Post remark</th><th>Δ level</th></tr></thead><tbody>${resultRows}</tbody></table></div>
-      <p class="muted" style="font-size:.78rem;margin-top:8px">Your improvement is shown per component and overall. Inferential significance testing (paired t-test) is available to your teacher and the administrator.</p>
+    <div class="card" style="margin-bottom:18px"><h3>${ic('radar')} Radar profile <span class="muted" style="font-size:.72rem;font-weight:400">(red = pre · neon green = post)</span></h3><div class="chart-box"><canvas id="rRadar"></canvas></div></div>
+    <div class="card"><h3>${ic('clipboard-list')} Result analysis</h3>
+      <div style="font-weight:600;color:var(--gold-soft);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Body composition (BMI)</div>
+      <div class="bmibox" style="margin-bottom:18px">${bmiCell(rec,'pre')}${bmiCell(rec,'post')}<div class="b"><div class="v" style="color:${bChange==null?'var(--muted)':(bChange<0?'var(--ok)':bChange>0?'var(--warn)':'var(--muted)')}">${bChange==null?'—':(bChange>0?'+':'')+bChange.toFixed(1)}</div><div class="l">BMI change</div></div></div>
+      <div style="font-weight:600;color:var(--gold-soft);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Component improvement</div>
+      <div class="chart-box" style="height:300px;margin-bottom:14px"><canvas id="rBar"></canvas></div>
+      <div class="tbl-wrap"><table><thead><tr><th>Component</th><th>Pre remark</th><th>Post remark</th><th>Δ level</th></tr></thead><tbody>${impRows}</tbody></table></div>
+      <p class="muted" style="font-size:.78rem;margin-top:8px">Inferential significance testing (paired t-test) is available to your teacher and the administrator.</p>
       <div style="display:flex;gap:10px;margin-top:14px"><button class="btn btn-gold" id="dlStud">${ic('download')} Download my result (PDF)</button></div>
     </div>`;
   icons();
@@ -576,6 +641,7 @@ function studGuide(){el('studBody').innerHTML=`<div class="card"><h3>${ic('book-
 /* ============================================================ 8. TEACHER ============================================================ */
 function teacherSections(){return DB.sections.filter(s=>s.teacherId===SESSION.id).map(s=>s.label);}
 function studentsInSection(sec){return DB.students.filter(s=>s.section===sec);}
+function teacherPendingReqs(){const secs=teacherSections();return DB.editRequests.filter(r=>r.status==='pending'&&secs.includes(r.section));}
 let activeSection=null;
 function renderTeacher(){
   clearCharts();const secs=teacherSections();
@@ -586,12 +652,13 @@ function renderTeacher(){
     el('addSecBtn').onclick=addSection;icons();return;
   }
   if(!activeSection||!secs.includes(activeSection))activeSection=secs[0];
-  const list=studentsInSection(activeSection),agg=sectionAggregate(list);const secObj=sectionByLabel(activeSection);
+  const list=studentsInSection(activeSection),agg=sectionAggregate(list);const secObj=sectionByLabel(activeSection);const reqs=teacherPendingReqs();
   el('appMain').innerHTML=`
     <div class="eyebrow">Class Management · AY ${esc(DB.term.ay)} · ${esc(DB.term.sem)}</div><h2 class="sec">Section Monitoring</h2>
-    <p class="sub">Enrol students by email, track who completed each test, review interventions, and analyze performance.</p>
+    <p class="sub">Enrol students by email, track who completed each test, review interventions, approve correction requests, and analyze performance.</p>
     <div class="tabbar" id="secTabs">${secs.map(s=>{const so=sectionByLabel(s);const pend=so&&so.status==='pending';return`<div class="tab ${s===activeSection?'active':''}" data-sec="${esc(s)}">${ic('users')}${esc(s)} · ${studentsInSection(s).length}${pend?` <span class="rate r3" style="margin-left:6px">pending</span>`:''}</div>`;}).join('')}<div class="tab no-print" id="addSecBtn">${ic('plus')}Add section</div></div>
-    ${secObj&&secObj.status==='pending'?`<div class="card" style="margin-bottom:16px;border-color:var(--line-gold)"><h3 style="margin:0">${ic('hourglass')} Awaiting admin approval</h3><p class="muted" style="margin:6px 0 0;font-size:.86rem">You can prepare this section now, but it won't appear in the student sign-up list until the administrator approves it.</p></div>`:''}
+    ${secObj&&secObj.status==='pending'?`<div class="banner">${ic('hourglass')}<div><b>Awaiting admin approval.</b> You can prepare this section now, but it won't appear in the student sign-up list until the administrator approves it.</div></div>`:''}
+    ${reqs.length?`<div class="card" style="margin-bottom:18px;border-color:var(--line-gold)"><h3>${ic('mail-question')} Correction requests (${reqs.length})</h3><div class="tbl-wrap" id="reqWrap"></div></div>`:''}
     <div class="cards-grid grid-4" style="margin-bottom:18px">
       ${stat(list.length,'Enrolled','users')}
       ${stat(list.filter(r=>phaseStatus(r,'pre')==='done').length+'<small>/'+list.length+'</small>','Pre-test done','clipboard-pen')}
@@ -611,11 +678,19 @@ function renderTeacher(){
       <div class="tbl-wrap" id="rosterWrap"></div></div>`;
   radarChart(el('tRadar'),agg.prePts,agg.postPts);
   barChart(el('tBar'),STATIONS.map(s=>s.short),STATIONS.map(s=>+((agg.postPts[s.key]||0)-(agg.prePts[s.key]||0)).toFixed(2)));
+  if(reqs.length)renderReqs(reqs,'reqWrap');
   renderRoster(list,'rosterWrap');
   el('secTabs').addEventListener('click',e=>{const t=e.target.closest('.tab[data-sec]');if(t){activeSection=t.dataset.sec;renderTeacher();}});
   el('addSecBtn').onclick=addSection;el('addStudBtn').onclick=()=>addStudentByEmail(activeSection);
   el('csvBtn').onclick=()=>exportCSV(list,'section_'+activeSection);el('reportBtn').onclick=()=>printStatReport('Section '+activeSection,list);
   icons();
+}
+function renderReqs(reqs,mountId){
+  let h=`<table><thead><tr><th>Student</th><th>Test</th><th>Reason</th><th>Date</th><th>Action</th></tr></thead><tbody>`;
+  reqs.forEach(r=>{h+=`<tr><td><b>${esc(r.studentName)}</b></td><td>${esc(r.phase)}-test</td><td class="muted" style="font-size:.82rem">${esc(r.reason||'—')}</td><td class="muted" style="font-size:.78rem">${esc(r.date)}</td><td style="white-space:nowrap"><button class="btn btn-sm btn-gold" data-appr="${r.id}">${ic('check')} Approve</button> <button class="iconbtn" data-decl="${r.id}" title="Decline">${ic('x')}</button></td></tr>`;});
+  el(mountId).innerHTML=h+'</tbody></table>';icons();
+  el(mountId).querySelectorAll('[data-appr]').forEach(b=>b.onclick=()=>{const r=DB.editRequests.find(x=>x.id===b.dataset.appr);if(!r)return;const rec=DB.students.find(s=>s.id===r.studentId);if(rec){rec.lock=rec.lock||{};rec.lock[r.phase]=false;}r.status='approved';save();toast('Approved — student can now edit their '+r.phase+'-test');rerender();});
+  el(mountId).querySelectorAll('[data-decl]').forEach(b=>b.onclick=()=>{const r=DB.editRequests.find(x=>x.id===b.dataset.decl);if(r){r.status='declined';save();toast('Request declined');rerender();}});
 }
 function sectionAggregate(list){const prePts={},postPts={},preC={},postC={};let preSum=0,preN=0,postSum=0,postN=0;STATIONS.forEach(s=>{prePts[s.key]=0;postPts[s.key]=0;preC[s.key]=0;postC[s.key]=0;});list.forEach(rec=>{const p=phaseSummary(rec,'pre'),q=phaseSummary(rec,'post');STATIONS.forEach(s=>{if(p.pts[s.key]!=null){prePts[s.key]+=p.pts[s.key];preC[s.key]++;}if(q.pts[s.key]!=null){postPts[s.key]+=q.pts[s.key];postC[s.key]++;}});if(p.filled){preSum+=p.pct;preN++;}if(q.filled){postSum+=q.pct;postN++;}});STATIONS.forEach(s=>{prePts[s.key]=preC[s.key]?+(prePts[s.key]/preC[s.key]).toFixed(2):0;postPts[s.key]=postC[s.key]?+(postPts[s.key]/postC[s.key]).toFixed(2):0;});return{prePts,postPts,preAvgPct:preN?Math.round(preSum/preN):0,postAvgPct:postN?Math.round(postSum/postN):0};}
 function classStatBlock(list){const pre=[],post=[];list.forEach(rec=>{const p=phaseSummary(rec,'pre'),q=phaseSummary(rec,'post');if(p.filled&&q.filled){pre.push(p.pct);post.push(q.pct);}});if(pre.length<2)return`<p class="muted">Need ≥ 2 students with both pre- and post-test results for a class-level paired t-test.</p>`;const res=pairedT(pre,post);return`<div class="stat-readout"><p>Descriptives (overall % score): pre-test <code>M = ${mean(pre).toFixed(1)}</code>, <code>SD = ${sd(pre).toFixed(1)}</code>; post-test <code>M = ${mean(post).toFixed(1)}</code>, <code>SD = ${sd(post).toFixed(1)}</code> (n = ${pre.length} students).</p>${statBlock(res,'overall % score across students')}</div>`;}
@@ -624,7 +699,7 @@ function renderRoster(list,mountId){
   if(!list.length)h+=`<tr><td colspan="10" class="muted" style="text-align:center;padding:24px">No students enrolled. Click “Enrol by email”.</td></tr>`;
   list.forEach(rec=>{const p=phaseSummary(rec,'pre'),q=phaseSummary(rec,'post'),gain=(p.filled&&q.filled)?q.pct-p.pct:null;
     h+=`<tr><td><b>${esc(rec.name)}</b></td><td class="muted" style="font-size:.78rem">${esc(rec.email||'—')}</td><td>${rec.gender}</td>
-      <td>${statusChip(phaseStatus(rec,'pre'),p.filled)}</td><td>${statusChip(phaseStatus(rec,'post'),q.filled)}</td>
+      <td>${statusChip(phaseStatus(rec,'pre'),p.filled)} ${isLocked(rec,'pre')?ic('lock'):''}</td><td>${statusChip(phaseStatus(rec,'post'),q.filled)} ${isLocked(rec,'post')?ic('lock'):''}</td>
       <td>${rec.intervention?`<span class="chip done">${ic('paperclip')} Yes</span>`:`<span class="chip none">—</span>`}</td>
       <td>${p.filled?p.pct+'%':'—'}</td><td>${q.filled?q.pct+'%':'—'}</td>
       <td>${gain==null?'—':`<b style="color:${gain>=0?'var(--ok)':'var(--bad)'}">${gain>=0?'+':''}${gain}%</b>`}</td>
@@ -642,32 +717,41 @@ function renderRoster(list,mountId){
 }
 function addSection(){modal(`<h3 class="grok">${ic('plus')} Add a section</h3><p class="sub">New sections are submitted to the administrator for approval before students can choose them.</p><label class="fld"><span>Section name</span><input id="newSec" placeholder="e.g. BSED-PE 1B"></label><div class="err" id="nsE"></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" data-close>Cancel</button><button class="btn btn-gold" id="newSecBtn">Submit for approval</button></div>`);el('newSecBtn').onclick=()=>{const s=val('newSec');if(!s)return;if(DB.sections.some(x=>x.label===s)){el('nsE').textContent='A section with that name already exists.';return;}DB.sections.push({id:uid(),label:s,teacherId:SESSION.id,status:'pending',term:Object.assign({},DB.term),createdBy:SESSION.id});save();activeSection=s;closeModal();toast('Section submitted for admin approval');renderTeacher();};}
 function addStudentByEmail(section){
-  modal(`<h3 class="grok">${ic('user-plus')} Enrol student — ${esc(section)}</h3><p class="sub">Enrolled by email. When the student signs in with this email, this becomes their permanent section.</p>
+  modal(`<h3 class="grok">${ic('user-plus')} Enrol student — ${esc(section)}</h3><p class="sub">Enrolled by <b>@msugensan.edu.ph</b> email. When the student signs in with this email, this becomes their permanent section.</p>
   <div class="row">
     <label class="fld"><span>Full name</span><input id="asName"></label>
-    <label class="fld"><span>Email</span><input id="asEmail" placeholder="name@student.edu"></label>
+    <label class="fld"><span>Email</span><input id="asEmail" placeholder="name@msugensan.edu.ph"></label>
     <label class="fld"><span>Gender</span><select id="asGender"><option value="M">Male</option><option value="F">Female</option></select></label>
     <label class="fld"><span>Age</span><input id="asAge" type="number"></label>
   </div><div class="err" id="asErr"></div>
   <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" data-close>Cancel</button><button class="btn btn-gold" id="asBtn">Enrol</button></div>`);
-  el('asBtn').onclick=()=>{const name=val('asName'),email=val('asEmail').toLowerCase();if(!name||!email){el('asErr').textContent='Name and email are required.';return;}const ex=DB.students.find(s=>s.email&&s.email.toLowerCase()===email);if(ex){ex.section=section;ex.name=ex.name||name;save();closeModal();toast('Existing student moved to '+section);rerender();return;}DB.students.push({id:uid(),name,email,gender:val('asGender'),age:val('asAge'),heightM:'',weightKg:'',section,createdBy:SESSION.id,hr:{pre:{},post:{}},scores:{pre:{},post:{}}});save();closeModal();toast('Student enrolled');rerender();};
+  el('asBtn').onclick=()=>{const name=val('asName'),email=val('asEmail').toLowerCase();if(!name||!email){el('asErr').textContent='Name and email are required.';return;}if(!validDomain(email)){el('asErr').textContent='Email must be a '+EMAIL_DOMAIN+' address.';return;}const ex=DB.students.find(s=>s.email&&s.email.toLowerCase()===email);if(ex){ex.section=section;ex.name=ex.name||name;save();closeModal();toast('Existing student moved to '+section);rerender();return;}DB.students.push({id:uid(),name,email,gender:val('asGender'),age:val('asAge'),section,createdBy:SESSION.id,measure:{pre:{},post:{}},lock:{},hr:{pre:{},post:{}},scores:{pre:{},post:{}}});save();closeModal();toast('Student enrolled');rerender();};
 }
 function editStudent(id){
-  const rec=DB.students.find(s=>s.id===id);if(!rec)return;
+  const rec=DB.students.find(s=>s.id===id);if(!rec)return;rec.measure=rec.measure||{pre:{},post:{}};
   const mkRows=ph=>STATIONS.map(s=>{const v=(rec.scores[ph]||{})[s.key];return`<tr><td>${s.no}. ${s.comp}</td><td><input type="number" step="0.01" data-e="${ph}" data-k="${s.key}" value="${v!=null?v:''}" style="padding:6px 8px"></td></tr>`;}).join('');
+  const mm=ph=>(rec.measure[ph]||{});
   modal(`<h3 class="grok">${ic('pencil')} Edit — ${esc(rec.name)}</h3>
     <div class="row" style="margin-bottom:10px">
       <label class="fld"><span>Name</span><input id="esName" value="${esc(rec.name)}"></label>
       <label class="fld"><span>Email</span><input id="esEmail" value="${esc(rec.email||'')}"></label>
       <label class="fld"><span>Gender</span><select id="esG"><option value="M"${rec.gender!=='F'?' selected':''}>Male</option><option value="F"${rec.gender==='F'?' selected':''}>Female</option></select></label>
       <label class="fld"><span>Age</span><input id="esAge" type="number" value="${rec.age||''}"></label>
-      <label class="fld"><span>Height (m)</span><input id="esH" type="number" step="0.01" value="${rec.heightM||''}"></label>
-      <label class="fld"><span>Weight (kg)</span><input id="esW" type="number" step="0.1" value="${rec.weightKg||''}"></label>
       <label class="fld"><span>Section</span><input id="esSec" value="${esc(rec.section||'')}"></label>
     </div>
-    <div class="row"><div><div class="lbl muted" style="font-size:.7rem;text-transform:uppercase;margin-bottom:4px">Pre-test</div><table>${mkRows('pre')}</table></div><div><div class="lbl muted" style="font-size:.7rem;text-transform:uppercase;margin-bottom:4px">Post-test</div><table>${mkRows('post')}</table></div></div>
-    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px"><button class="btn btn-maroon btn-sm" id="esDel" style="margin-right:auto">${ic('trash-2')} Delete</button><button class="btn" data-close>Cancel</button><button class="btn btn-gold" id="esSave">Save</button></div>`);
-  el('esSave').onclick=()=>{rec.name=val('esName')||rec.name;rec.email=val('esEmail');rec.gender=val('esG');rec.age=val('esAge');rec.heightM=val('esH');rec.weightKg=val('esW');rec.section=val('esSec')||rec.section;document.querySelectorAll('[data-e]').forEach(inp=>{const ph=inp.dataset.e,k=inp.dataset.k;rec.scores[ph]=rec.scores[ph]||{};if(inp.value==='')delete rec.scores[ph][k];else rec.scores[ph][k]=parseFloat(inp.value);});save();closeModal();toast('Saved');rerender();};
+    <div class="row" style="margin-bottom:6px">
+      <label class="fld"><span>Pre Height (m)</span><input id="mPh" type="number" step="0.01" value="${mm('pre').h!=null?mm('pre').h:''}"></label>
+      <label class="fld"><span>Pre Weight (kg)</span><input id="mPw" type="number" step="0.1" value="${mm('pre').w!=null?mm('pre').w:''}"></label>
+      <label class="fld"><span>Post Height (m)</span><input id="mQh" type="number" step="0.01" value="${mm('post').h!=null?mm('post').h:''}"></label>
+      <label class="fld"><span>Post Weight (kg)</span><input id="mQw" type="number" step="0.1" value="${mm('post').w!=null?mm('post').w:''}"></label>
+    </div>
+    <div class="row"><div><div class="lbl muted" style="font-size:.7rem;text-transform:uppercase;margin-bottom:4px">Pre-test scores</div><table>${mkRows('pre')}</table></div><div><div class="lbl muted" style="font-size:.7rem;text-transform:uppercase;margin-bottom:4px">Post-test scores</div><table>${mkRows('post')}</table></div></div>
+    <p class="muted" style="font-size:.76rem;margin-top:8px">${ic('unlock')} Saving here as a teacher/admin also unlocks any locked test for re-entry.</p>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px"><button class="btn btn-maroon btn-sm" id="esDel" style="margin-right:auto">${ic('trash-2')} Delete</button><button class="btn" data-close>Cancel</button><button class="btn btn-gold" id="esSave">Save</button></div>`);
+  el('esSave').onclick=()=>{rec.name=val('esName')||rec.name;rec.email=val('esEmail');rec.gender=val('esG');rec.age=val('esAge');rec.section=val('esSec')||rec.section;
+    rec.measure.pre={h:el('mPh').value,w:el('mPw').value};rec.measure.post={h:el('mQh').value,w:el('mQw').value};
+    document.querySelectorAll('[data-e]').forEach(inp=>{const ph=inp.dataset.e,k=inp.dataset.k;rec.scores[ph]=rec.scores[ph]||{};if(inp.value==='')delete rec.scores[ph][k];else rec.scores[ph][k]=parseFloat(inp.value);});
+    save();closeModal();toast('Saved');rerender();};
   el('esDel').onclick=()=>{if(confirm('Delete '+rec.name+'?')){DB.students=DB.students.filter(s=>s.id!==id);save();closeModal();rerender();}};
 }
 
@@ -682,9 +766,10 @@ function renderManagerial(){
   ({overview:mgrOverview,students:mgrStudents,accounts:mgrAccounts,sections:mgrSections,norms:mgrNorms}[mgrTab])();icons();
 }
 function mgrOverview(){
-  const all=DB.students,agg=sectionAggregate(all),pend=pendingCount();
+  const all=DB.students,agg=sectionAggregate(all),pend=pendingCount();const reqs=DB.editRequests.filter(r=>r.status==='pending');
   el('mgrBody').innerHTML=`
-    ${pend?`<div class="card" style="margin-bottom:16px;border-color:var(--line-gold)"><h3 style="margin:0">${ic('bell')} ${pend} section${pend>1?'s':''} awaiting approval</h3><p class="muted" style="margin:6px 0 0;font-size:.86rem">Go to the <b>Sections</b> tab to review and approve teacher-created sections.</p></div>`:''}
+    ${pend?`<div class="banner">${ic('bell')}<div><b>${pend} section${pend>1?'s':''} awaiting approval.</b> Go to the <b>Sections</b> tab to review and approve.</div></div>`:''}
+    ${reqs.length?`<div class="banner">${ic('mail-question')}<div><b>${reqs.length} score-correction request${reqs.length>1?'s':''} pending</b> with teachers across sections.</div></div>`:''}
     <div class="cards-grid grid-4" style="margin-bottom:18px">${stat(all.length,'Total students','users')}${stat(DB.sections.length,'Sections','school')}${stat(DB.users.filter(u=>u.role==='teacher').length,'Teachers','clipboard-check')}${stat((agg.postAvgPct-agg.preAvgPct>=0?'+':'')+(agg.postAvgPct-agg.preAvgPct)+'<small>%</small>','Avg gain','trending-up')}</div>
     <div class="cards-grid grid-2" style="margin-bottom:18px"><div class="card"><h3>${ic('radar')} Institution radar</h3><div class="chart-box"><canvas id="mRadar"></canvas></div></div><div class="card"><h3>${ic('bar-chart-3')} Avg improvement by component</h3><div class="chart-box"><canvas id="mBar"></canvas></div></div></div>
     <div class="card" style="margin-bottom:18px"><h3>${ic('flask-conical')} Institution-wide statistical analysis</h3>${classStatBlock(all)}</div>
@@ -710,24 +795,36 @@ function mgrStudents(){
 function mgrAccounts(){
   let h=`<div class="card"><div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap"><h3 style="flex:1;margin:0">${ic('user-cog')} Teachers &amp; accounts</h3><button class="btn btn-sm" id="cloudBtn">${ic('cloud')} Cloud sync</button><button class="btn btn-gold btn-sm" id="addUser">${ic('user-plus')} Add account</button></div>
     <p class="muted" style="font-size:.8rem;margin:-4px 0 12px">As administrator you issue teacher accounts here — teachers cannot self-register.</p>
-    <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Username</th><th>Role</th><th>Section(s)</th><th></th></tr></thead><tbody>`;
-  DB.users.forEach(u=>{const secs=u.role==='teacher'?DB.sections.filter(s=>s.teacherId===u.id).map(s=>s.label).join(', '):'—';h+=`<tr><td><b>${esc(u.name)}</b></td><td class="muted" style="font-size:.78rem">${esc(u.email||'—')}</td><td>${esc(u.username)}</td><td><span class="rate ${u.role==='managerial'?'r1':u.role==='teacher'?'r4':'r3'}">${u.role}</span></td><td class="muted" style="font-size:.8rem">${esc(secs||'—')}</td><td>${u.id!=='u_admin'?`<button class="iconbtn" data-deluser="${u.id}" title="Remove">${ic('trash-2')}</button>`:'<span class="muted">—</span>'}</td></tr>`;});
+    <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Username</th><th>Role</th><th>Section(s)</th><th>Actions</th></tr></thead><tbody>`;
+  DB.users.forEach(u=>{const secs=u.role==='teacher'?DB.sections.filter(s=>s.teacherId===u.id).map(s=>s.label).join(', '):'—';h+=`<tr><td><b>${esc(u.name)}</b></td><td class="muted" style="font-size:.78rem">${esc(u.email||'—')}</td><td>${esc(u.username)}</td><td><span class="rate ${u.role==='managerial'?'r1':u.role==='teacher'?'r4':'r3'}">${u.role}</span></td><td class="muted" style="font-size:.8rem">${esc(secs||'—')}</td><td style="white-space:nowrap"><button class="iconbtn" data-edituser="${u.id}" title="Edit">${ic('pencil')}</button> ${u.id!=='u_admin'?`<button class="iconbtn" data-deluser="${u.id}" title="Remove">${ic('trash-2')}</button>`:''}</td></tr>`;});
   el('mgrBody').innerHTML=h+'</tbody></table></div></div>';
-  el('addUser').onclick=openAccountModal;el('cloudBtn').onclick=openCloudModal;
+  el('addUser').onclick=()=>openAccountModal(null);el('cloudBtn').onclick=openCloudModal;
+  el('mgrBody').querySelectorAll('[data-edituser]').forEach(b=>b.onclick=()=>openAccountModal(b.dataset.edituser));
   el('mgrBody').querySelectorAll('[data-deluser]').forEach(b=>b.onclick=()=>{if(confirm('Remove this account?')){DB.users=DB.users.filter(u=>u.id!==b.dataset.deluser);save();renderManagerial();}});icons();
 }
-function openAccountModal(){
-  modal(`<h3 class="grok">${ic('user-plus')} Add account</h3><p class="sub">Issue teacher, student, or managerial accounts.</p><div class="row">
-    <label class="fld"><span>Name</span><input id="auName"></label>
-    <label class="fld"><span>Role</span><select id="auRole"><option value="teacher">Teacher</option><option value="student">Student</option><option value="managerial">Managerial</option></select></label>
-    <label class="fld"><span>Email</span><input id="auEmail"></label>
-    <label class="fld"><span>Username</span><input id="auUser"></label>
-    <label class="fld"><span>Password</span><input id="auPass"></label>
-    <label class="fld"><span>Section</span><input id="auSec" placeholder="teacher: section handled / student: enrolled"></label></div>
-    <div class="err" id="auErr"></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" data-close>Cancel</button><button class="btn btn-gold" id="auBtn">Create</button></div>`);
-  el('auBtn').onclick=()=>{const name=val('auName'),role=val('auRole'),email=val('auEmail'),user=val('auUser'),pass=val('auPass'),sec=val('auSec');if(!name||!user||!pass){el('auErr').textContent='Name, username and password are required.';return;}if(DB.users.some(u=>u.username.toLowerCase()===user.toLowerCase())){el('auErr').textContent='Username taken.';return;}const nu={id:uid(),name,email,username:user,pass,role};
+function openAccountModal(editId){
+  const u=editId?DB.users.find(x=>x.id===editId):null;const isEdit=!!u;
+  const roleSel=r=>`<option value="teacher"${r==='teacher'?' selected':''}>Teacher</option><option value="student"${r==='student'?' selected':''}>Student</option><option value="managerial"${r==='managerial'?' selected':''}>Managerial</option>`;
+  modal(`<h3 class="grok">${ic(isEdit?'pencil':'user-plus')} ${isEdit?'Edit account':'Add account'}</h3><p class="sub">${isEdit?'Update this account. Leave password blank to keep it unchanged.':'Issue teacher, student, or managerial accounts. Email must be @msugensan.edu.ph.'}</p><div class="row">
+    <label class="fld"><span>Name</span><input id="auName" value="${u?esc(u.name):''}"></label>
+    <label class="fld"><span>Role</span><select id="auRole">${roleSel(u?u.role:'teacher')}</select></label>
+    <label class="fld"><span>Email (@msugensan.edu.ph)</span><input id="auEmail" value="${u?esc(u.email||''):''}"></label>
+    <label class="fld"><span>Username</span><input id="auUser" value="${u?esc(u.username):''}"></label>
+    <label class="fld"><span>Password${isEdit?' (blank = keep)':''}</span><input id="auPass"></label>
+    <label class="fld"><span>Section (teacher: handled / student: enrolled)</span><input id="auSec"></label></div>
+    <div class="err" id="auErr"></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" data-close>Cancel</button><button class="btn btn-gold" id="auBtn">${isEdit?'Save changes':'Create'}</button></div>`);
+  el('auBtn').onclick=()=>{const name=val('auName'),role=val('auRole'),email=val('auEmail').toLowerCase(),user=val('auUser'),pass=el('auPass').value.trim(),sec=val('auSec');
+    if(!name||!user){el('auErr').textContent='Name and username are required.';return;}
+    if(email&&!validDomain(email)){el('auErr').textContent='Email must be a '+EMAIL_DOMAIN+' address.';return;}
+    if(!isEdit&&!email){el('auErr').textContent='Email is required.';return;}
+    if(DB.users.some(x=>x.username.toLowerCase()===user.toLowerCase()&&(!u||x.id!==u.id))){el('auErr').textContent='Username taken.';return;}
+    if(isEdit){u.name=name;u.role=role;if(email)u.email=email;u.username=user;if(pass)u.pass=pass;
+      if(role==='teacher'&&sec&&!DB.sections.some(s=>s.label===sec))DB.sections.push({id:uid(),label:sec,teacherId:u.id,status:'approved',term:Object.assign({},DB.term),createdBy:SESSION.id});
+      save();closeModal();toast('Account updated');renderManagerial();return;}
+    if(!pass){el('auErr').textContent='Password is required.';return;}
+    const nu={id:uid(),name,email,username:user,pass,role};
     if(role==='teacher'&&sec&&!DB.sections.some(s=>s.label===sec))DB.sections.push({id:uid(),label:sec,teacherId:nu.id,status:'approved',term:Object.assign({},DB.term),createdBy:SESSION.id});
-    if(role==='student'&&email&&!DB.students.some(s=>s.email&&s.email.toLowerCase()===email.toLowerCase()))DB.students.push({id:uid(),name,email,gender:'M',age:'',heightM:'',weightKg:'',section:sec||'Unassigned',createdBy:nu.id,hr:{pre:{},post:{}},scores:{pre:{},post:{}}});
+    if(role==='student'&&email&&!DB.students.some(s=>s.email&&s.email.toLowerCase()===email))DB.students.push({id:uid(),name,email,gender:'M',age:'',section:sec||'Unassigned',createdBy:nu.id,measure:{pre:{},post:{}},lock:{},hr:{pre:{},post:{}},scores:{pre:{},post:{}}});
     DB.users.push(nu);save();closeModal();renderManagerial();};
 }
 function teacherOptions(sel){return DB.users.filter(u=>u.role==='teacher').map(u=>`<option value="${u.id}"${u.id===sel?' selected':''}>${esc(u.name)}</option>`).join('')||'<option value="">(no teachers yet)</option>';}
@@ -781,17 +878,20 @@ function mgrNorms(){
 function termLine(){return DB.term?('AY '+DB.term.ay+' · '+DB.term.sem):'';}
 function csv(s){s=(s==null?'':String(s));return/[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}
 function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href);}
-function exportCSV(list,fname){const head=['Name','Email','Sex','Age','Height_m','Weight_kg','BMI','Section','AcademicYear','Semester'];STATIONS.forEach(s=>head.push(s.short+'_pre',s.short+'_preRemark',s.short+'_post',s.short+'_postRemark'));head.push('Pre_%','Post_%','Gain_%','Intervention');const rows=[head.join(',')];list.forEach(rec=>{const p=phaseSummary(rec,'pre'),q=phaseSummary(rec,'post'),bmi=bmiOf(rec.heightM,rec.weightKg);const r=[csv(rec.name),csv(rec.email),rec.gender,rec.age,rec.heightM,rec.weightKg,bmi?bmi.toFixed(1):'',csv(rec.section),csv(DB.term.ay),csv(DB.term.sem)];STATIONS.forEach(s=>{const pv=(rec.scores.pre||{})[s.key],qv=(rec.scores.post||{})[s.key];r.push(pv!=null?pv:'',p.pts[s.key]!=null?RATE_LABELS[p.pts[s.key]]:'',qv!=null?qv:'',q.pts[s.key]!=null?RATE_LABELS[q.pts[s.key]]:'');});r.push(p.filled?p.pct:'',q.filled?q.pct:'',(p.filled&&q.filled)?q.pct-p.pct:'',rec.intervention?'Yes':'No');rows.push(r.join(','));});dl(new Blob([rows.join('\n')],{type:'text/csv'}),(fname||'pft')+'.csv');toast('CSV exported');}
+function exportCSV(list,fname){const head=['Name','Email','Sex','Age','Section','AcademicYear','Semester','BMI_pre','BMI_post'];STATIONS.forEach(s=>head.push(s.short+'_pre',s.short+'_preRemark',s.short+'_post',s.short+'_postRemark'));head.push('Pre_%','Post_%','Gain_%','Intervention');const rows=[head.join(',')];list.forEach(rec=>{const p=phaseSummary(rec,'pre'),q=phaseSummary(rec,'post');const bp=recBMI(rec,'pre'),bq=recBMI(rec,'post');const r=[csv(rec.name),csv(rec.email),rec.gender,rec.age,csv(rec.section),csv(DB.term.ay),csv(DB.term.sem),bp?bp.toFixed(1):'',bq?bq.toFixed(1):''];STATIONS.forEach(s=>{const pv=(rec.scores.pre||{})[s.key],qv=(rec.scores.post||{})[s.key];r.push(pv!=null?pv:'',p.pts[s.key]!=null?RATE_LABELS[p.pts[s.key]]:'',qv!=null?qv:'',q.pts[s.key]!=null?RATE_LABELS[q.pts[s.key]]:'');});r.push(p.filled?p.pct:'',q.filled?q.pct:'',(p.filled&&q.filled)?q.pct-p.pct:'',rec.intervention?'Yes':'No');rows.push(r.join(','));});dl(new Blob([rows.join('\n')],{type:'text/csv'}),(fname||'pft')+'.csv');toast('CSV exported');}
 function downloadResult(rec,showSig){
-  if(!rec)return;const p=phaseSummary(rec,'pre'),q=phaseSummary(rec,'post'),bmi=bmiOf(rec.heightM,rec.weightKg);const k=karvonen(rec.age,(rec.hr&&rec.hr.post&&rec.hr.post.rhr)||(rec.hr&&rec.hr.pre&&rec.hr.pre.rhr));
+  if(!rec)return;const p=phaseSummary(rec,'pre'),q=phaseSummary(rec,'post');const bp=recBMI(rec,'pre'),bq=recBMI(rec,'post');const k=karvonen(rec.age,(rec.hr&&rec.hr.post&&rec.hr.post.rhr)||(rec.hr&&rec.hr.pre&&rec.hr.pre.rhr));
   const res=pairedT(STATIONS.map(s=>p.pts[s.key]!=null?p.pts[s.key]:null),STATIONS.map(s=>q.pts[s.key]!=null?q.pts[s.key]:null));
+  const img=radarImage(p.pts,q.pts);
   let rowsHtml='';STATIONS.forEach(s=>{const pv=(rec.scores.pre||{})[s.key],qv=(rec.scores.post||{})[s.key],pr=p.pts[s.key],qr=q.pts[s.key],d=(pr!=null&&qr!=null)?qr-pr:null;rowsHtml+=`<tr><td>${s.no}. ${s.name}</td><td>${s.comp}</td><td>${pv!=null?pv:'—'}</td><td>${pr!=null?RATE_LABELS[pr]:'—'}</td><td>${qv!=null?qv:'—'}</td><td>${qr!=null?RATE_LABELS[qr]:'—'}</td><td style="color:${d>0?'#1a7f43':d<0?'#b3261e':'#666'}">${d==null?'—':(d>0?'▲ +'+d:d<0?'▼ '+d:'▬ 0')}</td></tr>`;});
   const statTxt=res.insufficient?'Insufficient paired data for a t-test.':`Paired t-test across 10 components: M = ${res.md>=0?'+':''}${res.md.toFixed(2)}, SD = ${res.sdd.toFixed(2)}, t(${res.df}) = ${isFinite(res.t)?res.t.toFixed(2):'∞'}, ${fmtP(res.p)}, Cohen's d = ${isFinite(res.cohend)?res.cohend.toFixed(2):'∞'} (${res.p<0.05?'significant':'not significant'} at α=.05).`;
   const win=window.open('','_blank');if(!win){toast('Allow pop-ups to download the report');return;}
-  win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>KLabs Result — ${esc(rec.name)}</title><style>body{font-family:Georgia,serif;color:#1a1a1a;max-width:800px;margin:24px auto;padding:0 20px}h1{font-size:20px;border-bottom:3px solid #6b1320;padding-bottom:8px;color:#6b1320}.brand{color:#c8960a;font-weight:bold;letter-spacing:1px}.meta{font-size:13px;color:#444;margin:8px 0 16px}.sum{display:flex;gap:14px;margin:14px 0}.box{flex:1;border:1px solid #ccc;border-radius:8px;padding:10px;text-align:center}.box b{font-size:22px;color:#6b1320;display:block}table{width:100%;border-collapse:collapse;font-size:12.5px;margin:10px 0}th,td{border:1px solid #ccc;padding:6px 8px;text-align:left}th{background:#6b1320;color:#ffd95e}.stat{font-size:12.5px;background:#faf6ef;border:1px solid #e6dcc8;border-radius:8px;padding:10px;margin-top:6px}@media print{.np{display:none}}</style></head><body>
+  win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>KLabs Result — ${esc(rec.name)}</title><style>body{font-family:Georgia,serif;color:#1a1a1a;max-width:800px;margin:24px auto;padding:0 20px}h1{font-size:20px;border-bottom:3px solid #6b1320;padding-bottom:8px;color:#6b1320}.brand{color:#c8960a;font-weight:bold;letter-spacing:1px}.meta{font-size:13px;color:#444;margin:8px 0 16px}.sum{display:flex;gap:14px;margin:14px 0}.box{flex:1;border:1px solid #ccc;border-radius:8px;padding:10px;text-align:center}.box b{font-size:22px;color:#6b1320;display:block}table{width:100%;border-collapse:collapse;font-size:12.5px;margin:10px 0}th,td{border:1px solid #ccc;padding:6px 8px;text-align:left}th{background:#6b1320;color:#ffd95e}.stat{font-size:12.5px;background:#faf6ef;border:1px solid #e6dcc8;border-radius:8px;padding:10px;margin-top:6px}h2{color:#6b1320;font-size:14px;margin:18px 0 4px}.legend{font-size:11px;color:#666}@media print{.np{display:none}}</style></head><body>
   <h1><span class="brand">KLabs</span> — BPED Physical Fitness Test · Individual Result</h1>
-  <div class="meta"><b>${esc(rec.name)}</b> | ${rec.gender==='F'?'Female':'Male'} | Age ${rec.age||'—'} | ${esc(rec.section||'')} | ${esc(rec.email||'')}<br>${esc(termLine())} · Height ${rec.heightM||'—'} m · Weight ${rec.weightKg||'—'} kg · BMI ${bmi?bmi.toFixed(1)+' ('+bmiClass(bmi)+')':'—'} · MHR ${k?k.mhr:'—'} bpm</div>
+  <div class="meta"><b>${esc(rec.name)}</b> | ${rec.gender==='F'?'Female':'Male'} | Age ${rec.age||'—'} | ${esc(rec.section||'')} | ${esc(rec.email||'')}<br>${esc(termLine())} · BMI pre ${bp?bp.toFixed(1):'—'} · BMI post ${bq?bq.toFixed(1):'—'} · MHR ${k?k.mhr:'—'} bpm</div>
   <div class="sum"><div class="box"><b>${p.pct}%</b>Pre-test (${p.rating})</div><div class="box"><b>${q.pct}%</b>Post-test (${q.rating})</div><div class="box"><b>${(p.filled&&q.filled)?(q.pct-p.pct>=0?'+':'')+(q.pct-p.pct)+'%':'—'}</b>Improvement</div></div>
+  ${img?`<h2>Radar profile</h2><div style="text-align:center"><img src="${img}" style="max-width:460px;width:100%"/></div><div class="legend" style="text-align:center"><span style="color:#e0322b">■</span> Pre-test &nbsp; <span style="color:#16a34a">■</span> Post-test</div>`:''}
+  <h2>Station results</h2>
   <table><thead><tr><th>Station</th><th>Component</th><th>Pre</th><th>Pre remark</th><th>Post</th><th>Post remark</th><th>Change</th></tr></thead><tbody>${rowsHtml}</tbody></table>
   ${showSig?`<div class="stat"><b>Scientific analysis.</b> ${statTxt}</div>`:''}
   <p style="font-size:11px;color:#777;margin-top:10px">Generated by KLabs (Kinetic Laboratory) · BPED · MSU–General Santos · Developed by JCB · ${esc(termLine())}.</p>
@@ -800,13 +900,15 @@ function downloadResult(rec,showSig){
 function printStatReport(title,list){
   const pre=[],post=[];list.forEach(rec=>{const p=phaseSummary(rec,'pre'),q=phaseSummary(rec,'post');if(p.filled&&q.filled){pre.push(p.pct);post.push(q.pct);}});
   const res=pre.length>=2?pairedT(pre,post):{insufficient:true,n:pre.length};const preM=pre.length?mean(pre):0,postM=post.length?mean(post):0;const agg=sectionAggregate(list);
+  const img=radarImage(agg.prePts,agg.postPts);
   let compRows='';STATIONS.forEach(s=>{const a=agg.prePts[s.key]||0,b=agg.postPts[s.key]||0;compRows+=`<tr><td>${s.no}. ${s.comp}</td><td>${a.toFixed(2)}</td><td>${b.toFixed(2)}</td><td style="color:${b-a>0?'#1a7f43':b-a<0?'#b3261e':'#666'}">${(b-a>=0?'+':'')+(b-a).toFixed(2)}</td></tr>`;});
   const statTxt=res.insufficient?`Insufficient paired data (n = ${res.n}) for a paired t-test.`:`A paired-samples t-test compared the post-test mean (M = ${postM.toFixed(1)}%, SD = ${sd(post).toFixed(1)}) with the pre-test mean (M = ${preM.toFixed(1)}%, SD = ${sd(pre).toFixed(1)}); mean difference = ${res.md>=0?'+':''}${res.md.toFixed(2)}, t(${res.df}) = ${isFinite(res.t)?res.t.toFixed(2):'∞'}, ${fmtP(res.p)}, Cohen's d = ${isFinite(res.cohend)?res.cohend.toFixed(2):'∞'}. The change is ${res.p<0.05?'<b>statistically significant</b>':'not statistically significant'} at α = .05 (${effSize(res.cohend)} effect).`;
   const win=window.open('','_blank');if(!win){toast('Allow pop-ups to print the report');return;}
-  win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>KLabs · ${esc(title)} — Statistical Report</title><style>body{font-family:Georgia,serif;max-width:820px;margin:24px auto;padding:0 20px;color:#1a1a1a}h1{color:#6b1320;border-bottom:3px solid #6b1320;padding-bottom:8px;font-size:20px}.brand{color:#c8960a;letter-spacing:1px}h2{color:#6b1320;font-size:15px;margin-top:20px}table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px}th,td{border:1px solid #ccc;padding:6px 8px}th{background:#6b1320;color:#ffd95e}.stat{font-size:13px;background:#faf6ef;border:1px solid #e6dcc8;border-radius:8px;padding:12px;line-height:1.6}</style></head><body>
+  win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>KLabs · ${esc(title)} — Statistical Report</title><style>body{font-family:Georgia,serif;max-width:820px;margin:24px auto;padding:0 20px;color:#1a1a1a}h1{color:#6b1320;border-bottom:3px solid #6b1320;padding-bottom:8px;font-size:20px}.brand{color:#c8960a;letter-spacing:1px}h2{color:#6b1320;font-size:15px;margin-top:20px}table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px}th,td{border:1px solid #ccc;padding:6px 8px}th{background:#6b1320;color:#ffd95e}.stat{font-size:13px;background:#faf6ef;border:1px solid #e6dcc8;border-radius:8px;padding:12px;line-height:1.6}.legend{font-size:11px;color:#666;text-align:center}</style></head><body>
   <h1><span class="brand">KLabs</span> — ${esc(title)} · Physical Fitness Test Report</h1>
   <p>${esc(termLine())} · Students: <b>${list.length}</b> · Paired (pre &amp; post): <b>${pre.length}</b> · Avg pre <b>${preM.toFixed(1)}%</b> · Avg post <b>${postM.toFixed(1)}%</b> · Avg gain <b>${(postM-preM>=0?'+':'')+(postM-preM).toFixed(1)}%</b></p>
   <h2>Inferential statistics</h2><div class="stat">${statTxt}</div>
+  ${img?`<h2>Average radar profile</h2><div style="text-align:center"><img src="${img}" style="max-width:460px;width:100%"/></div><div class="legend"><span style="color:#e0322b">■</span> Pre-test &nbsp; <span style="color:#16a34a">■</span> Post-test</div>`:''}
   <h2>Mean rating by component (1–5)</h2><table><thead><tr><th>Component</th><th>Pre (M)</th><th>Post (M)</th><th>Change</th></tr></thead><tbody>${compRows}</tbody></table>
   <h2>Enrolled roster</h2><table><thead><tr><th>Name</th><th>Email</th><th>Sex</th><th>Pre %</th><th>Post %</th><th>Gain</th></tr></thead><tbody>${list.map(r=>{const p=phaseSummary(r,'pre'),q=phaseSummary(r,'post');return`<tr><td>${esc(r.name)}</td><td>${esc(r.email||'')}</td><td>${r.gender}</td><td>${p.filled?p.pct+'%':'—'}</td><td>${q.filled?q.pct+'%':'—'}</td><td>${(p.filled&&q.filled)?((q.pct-p.pct>=0?'+':'')+(q.pct-p.pct)+'%'):'—'}</td></tr>`;}).join('')}</tbody></table>
   <p style="font-size:11px;color:#777;margin-top:16px">KLabs (Kinetic Laboratory) · BPED · MSU–General Santos · One-group pretest–posttest design · Developed by JCB.</p>
