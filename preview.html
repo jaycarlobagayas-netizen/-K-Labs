@@ -1,0 +1,285 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BPED Research Analytics — Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0608;--panel:#130d0f;--panel-2:#1a1214;--maroon:#6b1320;--maroon-bright:#a52338;--maroon-deep:#330911;
+--gold:#f2b705;--gold-soft:#ffd95e;--gold-deep:#c8960a;--text:#f6efe6;--muted:#b3a39c;--muted-2:#cbbdb5;
+--line:rgba(255,255,255,.08);--line-gold:rgba(242,183,5,.28);--radius:22px;--grok:'Space Grotesk',sans-serif;}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;line-height:1.6}
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px}.section{padding:46px 0}
+.section-head{margin-bottom:26px}.section-head.center{text-align:center}
+.section-head h2{font-family:var(--grok);font-size:clamp(26px,3.4vw,40px);font-weight:600;margin:.5rem 0 .4rem}
+.section-head p{color:var(--muted)}.gold{color:var(--gold)}
+.pill{display:inline-flex;gap:8px;border:1px solid var(--line-gold);border-radius:999px;padding:8px 16px;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);background:rgba(242,183,5,.05)}
+.card{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:var(--radius);padding:1.6rem 1.7rem}
+.card h3{color:var(--gold-soft);font-size:1.05rem;margin:0 0 1.2rem;font-family:var(--grok);font-weight:600}
+.bento{display:grid;gap:16px}.reveal{opacity:1}
+.eyebrow{font-size:13px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-deep)}
+.feature{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:center}
+.feat-media{position:relative;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);min-height:300px;background:linear-gradient(150deg,var(--maroon),var(--maroon-deep));display:grid;place-items:center}
+.feat-media .badge{position:absolute;top:18px;left:18px;background:rgba(10,6,8,.78);border:1px solid var(--line-gold);color:var(--gold);font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:8px 14px;border-radius:999px}
+.feat-media .ph{text-align:center;color:var(--muted)}.feat-media .big{font-size:2.6rem;display:block}
+.feat-media strong{color:var(--gold-soft);display:block;font-family:var(--grok)}.feat-media small{font-size:.7rem}
+.chips{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem}
+.chip{font-size:.75rem;border:1px solid var(--line);border-radius:999px;padding:.35rem .9rem;color:var(--muted)}
+.chip.gold{color:var(--gold);border-color:var(--line-gold);background:rgba(242,183,5,.06)}
+.scopus-banner{display:flex;align-items:center;gap:1.4rem;background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-left:5px solid #e9711c;border-radius:var(--radius);padding:1.5rem 1.8rem;flex-wrap:wrap}
+.scopus-logo{font-size:1.9rem;font-weight:800;color:#f0822e;font-family:Georgia,serif}
+.scopus-banner p{font-size:.92rem;color:var(--muted);flex:1;min-width:240px;margin:0}
+.pub-card{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:var(--radius);padding:1.6rem 1.7rem;display:flex;flex-direction:column;gap:.5rem}
+.pub-card:hover{border-color:var(--line-gold)}
+.pub-top{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.pub-year{background:linear-gradient(135deg,#e9711c,#f59a4e);color:#1a0a0e;font-size:.72rem;font-weight:900;letter-spacing:1px;padding:.3rem .8rem;border-radius:999px}
+.pub-type{background:rgba(233,113,28,.16);color:#f0a866;font-size:.64rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:.28rem .7rem;border-radius:999px;border:1px solid rgba(233,113,28,.3)}
+.pub-nonscopus{background:rgba(255,255,255,.04);color:var(--muted);border:1px solid var(--line);font-size:.64rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:.28rem .7rem;border-radius:999px}
+.pub-card h3{color:#fff;font-size:1.04rem;line-height:1.4;font-family:var(--grok);font-weight:600;margin:0}
+.pub-meta{font-size:.85rem;color:var(--muted);margin:0}.pub-abs{font-size:.88rem;color:var(--muted-2);margin:0}
+.pub-doi{color:#f0a866;font-weight:700;font-size:.84rem;text-decoration:none;margin-top:auto}
+
+/* ===== RESEARCH ANALYTICS ===== */
+.ra-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
+.ra-kpi{background:linear-gradient(160deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:var(--radius);padding:1.3rem 1.2rem;text-align:center;position:relative;overflow:hidden;transition:border-color .3s,transform .3s}
+.ra-kpi::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--maroon-bright),var(--gold))}
+.ra-kpi:hover{border-color:var(--line-gold);transform:translateY(-3px)}
+.ra-num{display:block;font-family:var(--grok);font-size:2.1rem;font-weight:700;color:var(--gold);line-height:1}
+.ra-lbl{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-top:.5rem;font-weight:700}
+.ra-charts{display:grid;grid-template-columns:.85fr 1.15fr;gap:20px}
+.ra-donut-wrap{display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;justify-content:center}
+#raDonut{width:190px;height:190px;flex:none}
+.ra-legend{display:flex;flex-direction:column;gap:.9rem;min-width:150px}
+.ra-lg{display:grid;grid-template-columns:auto 1fr;gap:.2rem .6rem;align-items:center}
+.ra-lg b{color:#fff;font-size:.9rem;font-weight:600}
+.ra-lg i{grid-column:2;font-style:normal;font-size:.78rem;color:var(--muted)}
+.ra-dot{width:13px;height:13px;border-radius:4px;grid-row:span 2}
+.ra-dot.sc{background:linear-gradient(135deg,#f59a4e,#e9711c)}
+.ra-dot.ns{background:linear-gradient(135deg,#6b1320,#a52338)}
+#raBars{width:100%;height:auto;display:block}
+.ra-cap{font-size:.78rem;color:var(--muted);margin-top:.7rem;line-height:1.6}
+.ra-sub{font-size:.9rem;color:var(--muted);margin:-.6rem 0 1.1rem}
+.gs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.8rem}
+.gs-card{display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:14px;padding:.85rem 1rem;text-decoration:none;transition:border-color .3s,transform .3s,background .3s}
+.gs-card:hover{border-color:var(--line-gold);transform:translateY(-3px);background:rgba(242,183,5,.05)}
+.gs-ava{width:40px;height:40px;flex:none;border-radius:50%;background:linear-gradient(135deg,var(--maroon),var(--maroon-deep));color:var(--gold);display:grid;place-items:center;font-weight:900;font-size:.82rem;border:2px solid var(--gold)}
+.gs-body{display:flex;flex-direction:column;min-width:0;flex:1}
+.gs-name{color:#fff;font-weight:600;font-size:.88rem;line-height:1.3}
+.gs-role{color:var(--gold-deep);font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-top:3px}
+.gs-go{color:var(--gold);font-weight:800;flex:none}
+.ra-filters{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.6rem}
+.ra-filter{background:rgba(255,255,255,.03);border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:.5rem 1.1rem;font:inherit;font-size:.8rem;font-weight:700;cursor:none;transition:.25s}
+@media(hover:none){.ra-filter{cursor:pointer}}
+.ra-filter:hover{border-color:var(--line-gold);color:var(--gold-soft)}
+.ra-filter.is-on{background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:#1a0a0e;border-color:transparent}
+.pub-card.is-hidden{display:none}
+@media(max-width:900px){.ra-kpis{grid-template-columns:repeat(2,1fr)}.ra-charts{grid-template-columns:1fr}}
+
+</style></head><body>
+<!-- PUBLICATIONS -->
+<section class="section" id="publications" aria-labelledby="h-pubs">
+  <div class="wrap">
+    <div class="section-head center reveal">
+      <span class="pill">✦ Research Repository</span>
+      <h2 id="h-pubs">Research <span class="gold">analytics &amp; publications</span></h2>
+      <p>The official repository of scientific publications by the BPED Department faculty.</p>
+    </div>
+
+    <!-- ===== RESEARCH ANALYTICS ===== -->
+    <div class="ra-kpis reveal">
+      <div class="ra-kpi"><span class="ra-num" data-count="20">0</span><span class="ra-lbl">Total publications</span></div>
+      <div class="ra-kpi"><span class="ra-num" data-count="9">0</span><span class="ra-lbl">Scopus-indexed</span></div>
+      <div class="ra-kpi"><span class="ra-num" data-count="7">0</span><span class="ra-lbl">Years represented</span></div>
+      <div class="ra-kpi"><span class="ra-num" data-count="5">0</span><span class="ra-lbl">Scholar profiles</span></div>
+    </div>
+
+    <div class="ra-charts">
+      <div class="card reveal">
+        <h3>◷ Indexing distribution</h3>
+        <div class="ra-donut-wrap">
+          <svg id="raDonut" viewBox="0 0 220 220" role="img" aria-label="Pie chart: 9 Scopus-indexed and 11 non-Scopus publications"></svg>
+          <div class="ra-legend">
+            <div class="ra-lg"><span class="ra-dot sc"></span><b>Scopus-indexed</b><i>9 papers · 45%</i></div>
+            <div class="ra-lg"><span class="ra-dot ns"></span><b>Non-Scopus</b><i>11 papers · 55%</i></div>
+          </div>
+        </div>
+      </div>
+      <div class="card reveal">
+        <h3>◫ Publications per year</h3>
+        <svg id="raBars" viewBox="0 0 560 300" role="img" aria-label="Bar and line chart of publication frequency per year"></svg>
+        <p class="ra-cap">Annual output across 2010–2026, with a trend line. Bars show total publications; the gold line traces the yearly trajectory.</p>
+      </div>
+    </div>
+
+    <!-- ===== GOOGLE SCHOLAR ===== -->
+    <div class="card reveal" style="margin-top:1.4rem">
+      <h3>🎓 Faculty Google Scholar profiles</h3>
+      <p class="ra-sub">Live citation records maintained by the faculty. Click any card to open the full profile on Google Scholar.</p>
+      <div class="gs-grid">
+      <a class="gs-card reveal" href="https://scholar.google.com/citations?user=csQoCo4AAAAJ" target="_blank" rel="noopener"><span class="gs-ava" aria-hidden="true">JB</span><span class="gs-body"><span class="gs-name">Jay Carlo S. Bagayas, MSPE</span><span class="gs-role">Faculty · Bachelor of Physical Education</span></span><span class="gs-go" aria-hidden="true">↗</span></a>
+      <a class="gs-card reveal" href="https://scholar.google.com/citations?user=khPU-9kAAAAJ" target="_blank" rel="noopener"><span class="gs-ava" aria-hidden="true">JW</span><span class="gs-body"><span class="gs-name">Jessel Gay Wacan, MSPE</span><span class="gs-role">Chairperson · Bachelor of Physical Education</span></span><span class="gs-go" aria-hidden="true">↗</span></a>
+      <a class="gs-card reveal" href="https://scholar.google.com/citations?user=49Vw-4sAAAAJ" target="_blank" rel="noopener"><span class="gs-ava" aria-hidden="true">SP</span><span class="gs-body"><span class="gs-name">Steffany Anne C. Poblador, LPT</span><span class="gs-role">Faculty · Bachelor of Physical Education</span></span><span class="gs-go" aria-hidden="true">↗</span></a>
+      <a class="gs-card reveal" href="https://scholar.google.com/citations?user=YiXWO2IAAAAJ" target="_blank" rel="noopener"><span class="gs-ava" aria-hidden="true">LM</span><span class="gs-body"><span class="gs-name">Lorie Martin, MSc</span><span class="gs-role">Faculty · Bachelor of Physical Education</span></span><span class="gs-go" aria-hidden="true">↗</span></a>
+      <a class="gs-card reveal" href="https://scholar.google.com/citations?user=BZdY-XMAAAAJ" target="_blank" rel="noopener"><span class="gs-ava" aria-hidden="true">SL</span><span class="gs-body"><span class="gs-name">Sammielyn Lavente, MAEd-PE</span><span class="gs-role">Faculty · Bachelor of Physical Education</span></span><span class="gs-go" aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+
+    <div class="feature reveal" style="margin:48px 0">
+      <div class="feat-media">
+        <span class="badge">Editorial Board · Scopus Q3</span>
+        <div class="ph"><div><span class="big">🔬</span><strong>Research Excellence</strong><small>images/research-editorial.jpg</small></div></div>
+        <img src="images/research-editorial.jpg" alt="BPED faculty appointed editorial board member of the Journal of Coaching and Sports Science (Scopus Q3)" loading="lazy" onerror="this.style.display='none'">
+      </div>
+      <div class="feat-body">
+        <span class="eyebrow">A research-active department</span>
+        <h2 style="margin-top:8px">Strong in <span class="gold">research publication</span></h2>
+        <p>BPED faculty publish consistently in <strong>Scopus-indexed, peer-reviewed journals</strong> across sports science, pedagogy, and PE innovation — and even serve on <strong>international editorial boards</strong>, such as the Journal of Coaching and Sports Science (JCSS).</p>
+        <p>The department's work extends into <strong>international research collaborations</strong>, including partners such as Universitas Negeri Malang and the University of Portsmouth, United Kingdom.</p>
+        <div class="chips">
+          <span class="chip gold">Scopus-indexed</span>
+          <span class="chip">Sports science</span>
+          <span class="chip">PE innovation</span>
+          <span class="chip">Global collaborations</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="scopus-banner reveal">
+      <span class="scopus-logo" aria-label="Scopus">Scopus<sup>®</sup></span>
+      <p>Publications below are indexed in <strong>Scopus</strong>, the world's largest abstract and citation database of peer-reviewed literature, unless tagged <em>Non-Scopus</em>.</p>
+    </div>
+
+    <div class="ra-filters reveal" role="group" aria-label="Filter publications">
+      <button class="ra-filter is-on" data-filter="all">All (20)</button>
+      <button class="ra-filter" data-filter="scopus">Scopus (9)</button>
+      <button class="ra-filter" data-filter="non">Non-Scopus (11)</button>
+    </div>
+
+    <div class="bento" style="margin-top:1.4rem;grid-template-columns:repeat(2,1fr)" id="pubList">
+      <article class="pub-card reveal" data-year="2026" data-scopus="true"><div class="pub-top"><span class="pub-year">2026</span><span class="pub-type">Sports Performance</span></div><h3>A 6-Week Target Tactics Training Program (TTTP) and Its Effectiveness on the Shooting Accuracy of Collegiate Football Players</h3><p class="pub-meta">Madamecila, J., Diocales, J. D. A., <strong>Bagayas, J. C.</strong>, Pelones, M. T., <strong>Martin, L.</strong>, et al.</p><p class="pub-abs"><em>Kinesiologia Slovenica</em>, 32(2), 75–91.</p><span class="pub-doi" style="cursor:default">Published Article</span></article>
+      <article class="pub-card reveal d1" data-year="2026" data-scopus="true"><div class="pub-top"><span class="pub-year">2026</span><span class="pub-type">Experimental Study</span></div><h3>Effectiveness of a 5-Week High-Intensity Interval Training on Endurance Capacities and BMI Reduction Among Overweight Female Student-Athletes</h3><p class="pub-meta">Longakit, J., Rodriguez, D., Wacan, J. G., <strong>Bagayas, J. C.</strong>, Salamat, M., Cuya, M., Carrillo, L. J., Andallaza, E. J. C., Alag, Y., &amp; Mancha, R.</p><p class="pub-abs"><em>Pedagogy of Physical Culture and Sports</em>, 30(2), 111–120.</p><span class="pub-doi" style="cursor:default">Published Article</span></article>
+      <article class="pub-card reveal" data-year="2026" data-scopus="true"><div class="pub-top"><span class="pub-year">2026</span><span class="pub-type">Educational Research</span></div><h3>Examining Artificial Intelligence Literacy of Filipino College Students Using the Theory of Planned Behavior</h3><p class="pub-meta">Pantao, J. G., Cahapay, M. B., Ulanday-Lozano, D. M. P., Pelones, M. T. P., Andang-Alaiden, E., Lañojan, R. S., Sales, A. M., &amp; <strong>Bagayas, J. C. S.</strong></p><p class="pub-abs"><em>European Journal of Educational Research</em>, 15(3), 699–711.</p><a class="pub-doi" href="https://doi.org/10.12973/eu-jer.15.3.699" target="_blank" rel="noopener">DOI: 10.12973/eu-jer.15.3.699 ↗</a></article>
+      <article class="pub-card reveal d1" data-year="2026" data-scopus="true"><div class="pub-top"><span class="pub-year">2026</span><span class="pub-type">Innovation in PE</span></div><h3>Futenvol: An Innovative Game for Physical Education Students</h3><p class="pub-meta"><strong>Bagayas, J. C.</strong>, Diego, C. J. S., Malayao Jr., S. O., &amp; Sumando, G. A.</p><p class="pub-abs"><em>Journal of Education and Learning (EduLearn)</em>, 20(1), 532–541.</p><a class="pub-doi" href="https://doi.org/10.11591/edulearn.v20i1.22299" target="_blank" rel="noopener">DOI: 10.11591/edulearn.v20i1.22299 ↗</a></article>
+      <article class="pub-card reveal" data-year="2026" data-scopus="false"><div class="pub-top"><span class="pub-year">2026</span><span class="pub-type">Cross-Sectional Study</span><span class="pub-nonscopus">Non-Scopus</span></div><h3>A Cross-Sectional Analysis of Women's Sports Perceptions and Athletic Engagement</h3><p class="pub-meta"><strong>Bagayas, J. C.</strong>, &amp; Carrillo, L. J.</p><p class="pub-abs"><em>Journal of Sports and Physical Activity</em>, 2(1), 23–32.</p><a class="pub-doi" href="https://doi.org/10.64268/jospa.v2i1.21" target="_blank" rel="noopener">DOI: 10.64268/jospa.v2i1.21 ↗</a></article>
+      <article class="pub-card reveal d1" data-year="2026" data-scopus="false"><div class="pub-top"><span class="pub-year">2026</span><span class="pub-type">Sports Psychology</span><span class="pub-nonscopus">Non-Scopus</span></div><h3>Examining Mental Toughness and Collegiate Performance in Individual Sports: A Descriptive-Correlational Study</h3><p class="pub-meta">Constancio, C., Mallanao, J. L., &amp; <strong>Bagayas, J. C.</strong></p><p class="pub-abs"><em>Journal of Holistic Sports and Physical Education</em>, 1(2), 71–84.</p><span class="pub-doi" style="cursor:default">Published Article</span></article>
+      <article class="pub-card reveal" data-year="2026" data-scopus="false"><div class="pub-top"><span class="pub-year">2026</span><span class="pub-type">Phenomenology</span><span class="pub-nonscopus">Non-Scopus</span></div><h3>Teaching as an Existential Challenge: A Phenomenological Study of Teacher Well-Being, Identity, and Commitment</h3><p class="pub-meta">Gomez, J. M. A., Torocio, D. A. A., &amp; <strong>Bagayas, J. C. S.</strong></p><p class="pub-abs"><em>Psychology and Education: A Multidisciplinary Journal</em>, 57(1), 24–31.</p><span class="pub-doi" style="cursor:default">Published Article</span></article>
+      <article class="pub-card reveal d1" data-year="2025" data-scopus="true"><div class="pub-top"><span class="pub-year">2025</span><span class="pub-type">Physical Activity</span></div><h3>Active Lives, Fulfilled Needs: Physical Activity and the Triad of Autonomy, Competence, and Relatedness Among Filipino University Students</h3><p class="pub-meta">Dalipe, M. A. R., Rosario, M. A. B., Reyes, M. D. L., <strong>Poblador, S. A. C.</strong>, Kee, J. C., et al.</p><p class="pub-abs"><em>Sportis. Scientific Journal of School Sport, Physical Education and Psychomotricity</em>.</p><span class="pub-doi" style="cursor:default">Published Article</span></article>
+      <article class="pub-card reveal" data-year="2025" data-scopus="true"><div class="pub-top"><span class="pub-year">2025</span><span class="pub-type">Experimental Study</span></div><h3>Evaluating the Effect of a 6-Week Progressive Running Interval Training Program on Endurance and Body Mass Index in Overweight College Students</h3><p class="pub-meta">Longakit, J., Fajardo, R., Coming, L., Toring-Aque, L., Aque, F. Jr., Villaganas, E. Jr., <strong>Bagayas, J. C.</strong>, Cuya, M., &amp; Cordova, A. J.</p><p class="pub-abs"><em>Pedagogy of Physical Culture and Sports</em>, 29(4), 253–262.</p><a class="pub-doi" href="https://doi.org/10.15561/26649837.2025.0403" target="_blank" rel="noopener">DOI: 10.15561/26649837.2025.0403 ↗</a></article>
+      <article class="pub-card reveal d1" data-year="2025" data-scopus="true"><div class="pub-top"><span class="pub-year">2025</span><span class="pub-type">Sports Psychology</span></div><h3>Which Goals Matter? Examining the Influence of Task and Ego Orientation on the Sports Performance of Physical Education Students</h3><p class="pub-meta"><strong>Bagayas, J. C.</strong>, <strong>Poblador, S. A. C.</strong>, Cuya, M., <strong>Wacan, J. G. S.</strong>, <strong>Lavente, S.</strong>, &amp; Longakit, J.</p><p class="pub-abs"><em>Sportis. Scientific Journal of School Sport, Physical Education and Psychomotricity</em>, 11(4), 1–20.</p><a class="pub-doi" href="https://doi.org/10.17979/sportis.2025.11.4.11973" target="_blank" rel="noopener">DOI: 10.17979/sportis.2025.11.4.11973 ↗</a></article>
+      <article class="pub-card reveal" data-year="2025" data-scopus="false"><div class="pub-top"><span class="pub-year">2025</span><span class="pub-type">Sports Participation</span><span class="pub-nonscopus">Non-Scopus</span></div><h3>The Contribution of Participation on Individual Success in Sports: Examining the Impact of Sports Participation on Performance Outcomes</h3><p class="pub-meta">Angoy, R. D., Mamun, A., Mahendra, A., Abduljabar, B., Lim, R. M. D., <strong>Wacan, J. G.</strong>, et al.</p><p class="pub-abs"><em>Journal of Physical Education</em>, 36, e3626.</p><span class="pub-doi" style="cursor:default">Published Article</span></article>
+      <article class="pub-card reveal d1" data-year="2024" data-scopus="true"><div class="pub-top"><span class="pub-year">2024</span><span class="pub-type">Qualitative Study</span></div><h3>Filipino Teachers' Favorable Experiences in Teaching Sports Track During the Transition Years of Philippine K-12</h3><p class="pub-meta"><strong>Poblador, S. A.</strong>, &amp; Tagare, R. L. Jr.</p><p class="pub-abs"><em>The Physical Educator</em>, 81(2).</p><span class="pub-doi" style="cursor:default">Published Article</span></article>
+      <article class="pub-card reveal" data-year="2024" data-scopus="false"><div class="pub-top"><span class="pub-year">2024</span><span class="pub-type">Conference Paper</span><span class="pub-nonscopus">Non-Scopus</span></div><h3>FUTENDO</h3><p class="pub-meta"><strong>Bagayas, J. C.</strong>, &amp; San Diego, C. J.</p><p class="pub-abs"><em>The 9th ASEAN Council of Physical Education and Sport (ACPES) Conference 2023</em>.</p><span class="pub-doi" style="cursor:default">Published Article</span></article>
+      <article class="pub-card reveal d1" data-year="2023" data-scopus="true"><div class="pub-top"><span class="pub-year">2023</span><span class="pub-type">Phenomenology</span></div><h3>Phenomenological Probe on Senior High School Teachers' Experiences in Teaching Sports Track During the Transition Years of Philippine K to 12</h3><p class="pub-meta"><strong>Poblador, S. A.</strong>, &amp; Tagare, R. L. Jr.</p><p class="pub-abs"><em>Sportis. Scientific Journal of School Sport, Physical Education and Psychomotricity</em>.</p><span class="pub-doi" style="cursor:default">Published Article</span></article>
+      <article class="pub-card reveal" data-year="2023" data-scopus="false"><div class="pub-top"><span class="pub-year">2023</span><span class="pub-type">Qualitative Study</span><span class="pub-nonscopus">Non-Scopus</span></div><h3>Exploring the Positive Experiences of Senior High School Teachers in Teaching the Sports Track During the K-12 Transition Years in Southern Philippines</h3><p class="pub-meta"><strong>Poblador, S. A.</strong></p><p class="pub-abs"><em>Research in Education and Learning Innovation Archives</em>, 17–32.</p><span class="pub-doi" style="cursor:default">Published Article</span></article>
+      <article class="pub-card reveal d1" data-year="2023" data-scopus="false"><div class="pub-top"><span class="pub-year">2023</span><span class="pub-type">Conference Paper</span><span class="pub-nonscopus">Non-Scopus</span></div><h3>Precompetitive Mood Among Futsal Players in Relation to Team Performance</h3><p class="pub-meta"><strong>Bagayas, J. C. S.</strong></p><p class="pub-abs"><em>Proceedings of the 8th ACPES (ASEAN Council of Physical Education and Sport)</em>.</p><span class="pub-doi" style="cursor:default">Published Article</span></article>
+      <article class="pub-card reveal" data-year="2023" data-scopus="false"><div class="pub-top"><span class="pub-year">2023</span><span class="pub-type">Inclusive Recreation</span><span class="pub-nonscopus">Non-Scopus</span></div><h3>Valuing Inclusive Recreational Activities for Special Children: Leave No One Behind</h3><p class="pub-meta">Fadare, S., <strong>Wacan, J. G. S.</strong>, Moreno, H. R., Tecson-Casane, F. H., Catalan, A. S., et al.</p><p class="pub-abs"><em>Kepes</em>, 21(2), 214–222.</p><span class="pub-doi" style="cursor:default">Published Article</span></article>
+      <article class="pub-card reveal d1" data-year="2022" data-scopus="false"><div class="pub-top"><span class="pub-year">2022</span><span class="pub-type">Policy & Curriculum</span><span class="pub-nonscopus">Non-Scopus</span></div><h3>K to 12 Transition in Action: Threading the Opportunities and Challenges on the Implementation of Senior High School Sports Track in Southern Philippines</h3><p class="pub-meta"><strong>Poblador, S. A. C.</strong>, &amp; Tagare, R. L.</p><p class="pub-abs"><em>Edu Sportivo: Indonesian Journal of Physical Education</em>, 3(1), 65–76.</p><span class="pub-doi" style="cursor:default">Published Article</span></article>
+      <article class="pub-card reveal" data-year="2018" data-scopus="false"><div class="pub-top"><span class="pub-year">2018</span><span class="pub-type">Biomechanics</span><span class="pub-nonscopus">Non-Scopus</span></div><h3>Kinematic Analysis of Sipa sa Mangis: Exploring the Science of the Art</h3><p class="pub-meta">Noh, Y. G., &amp; <strong>Martin, L. B.</strong></p><p class="pub-abs"><em>Journal of Health Research and Society</em>, 1, 4.</p><span class="pub-doi" style="cursor:default">Published Article</span></article>
+      <article class="pub-card reveal d1" data-year="2010" data-scopus="false"><div class="pub-top"><span class="pub-year">2010</span><span class="pub-type">Sports Nutrition</span><span class="pub-nonscopus">Non-Scopus</span></div><h3>Knowledge, Attitudes, and Practices Regarding Hydration and Fluid Replacement of Student-Athletes from Mindanao State University, Philippines</h3><p class="pub-meta"><strong>Martin, L. B.</strong></p><p class="pub-abs"><em>St. Cloud State University</em>.</p><span class="pub-doi" style="cursor:default">Published Article</span></article>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ===== RESEARCH ANALYTICS CHARTS ===== */
+(function(){
+  var SC=9, NS=11, TOT=20;
+  var DATA=[{y:2010,n:1},{y:2018,n:1},{y:2022,n:1},{y:2023,n:4},{y:2024,n:2},{y:2025,n:4},{y:2026,n:7},];
+  var drawn=false;
+
+  function donut(){
+    var svg=document.getElementById('raDonut'); if(!svg)return;
+    var cx=110,cy=110,r=78,w=26, C=2*Math.PI*r;
+    var parts=[{v:SC,c:'url(#gSc)'},{v:NS,c:'url(#gNs)'}];
+    var html='<defs>'+
+      '<linearGradient id="gSc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f59a4e"/><stop offset="1" stop-color="#e9711c"/></linearGradient>'+
+      '<linearGradient id="gNs" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a52338"/><stop offset="1" stop-color="#6b1320"/></linearGradient></defs>';
+    html+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="'+w+'"/>';
+    var off=0;
+    parts.forEach(function(p,i){
+      var len=C*(p.v/TOT);
+      html+='<circle class="raSeg" cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+p.c+'" stroke-width="'+w+'"'+
+        ' stroke-linecap="butt" stroke-dasharray="0 '+C+'" transform="rotate(-90 '+cx+' '+cy+')"'+
+        ' data-len="'+len+'" data-off="'+(-off)+'" style="transition:stroke-dasharray 1.1s cubic-bezier(.2,.8,.2,1) '+(i*.18)+'s"/>';
+      off+=len;
+    });
+    html+='<text x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle" fill="#f2b705" style="font:700 30px \'Space Grotesk\',sans-serif">'+TOT+'</text>';
+    html+='<text x="'+cx+'" y="'+(cy+18)+'" text-anchor="middle" fill="#b3a39c" style="font:600 10px Inter,sans-serif;letter-spacing:1.6px">PAPERS</text>';
+    svg.innerHTML=html;
+    requestAnimationFrame(function(){
+      svg.querySelectorAll('.raSeg').forEach(function(s){
+        s.setAttribute('stroke-dasharray',s.dataset.len+' '+(C-s.dataset.len));
+        s.setAttribute('stroke-dashoffset',s.dataset.off);
+      });
+    });
+  }
+
+  function bars(){
+    var svg=document.getElementById('raBars'); if(!svg)return;
+    var W=560,H=300,L=42,R=14,T=18,B=42;
+    var iw=W-L-R, ih=H-T-B;
+    var max=Math.max.apply(null,DATA.map(function(d){return d.n}))||1;
+    max=Math.ceil(max/2)*2;
+    var n=DATA.length, slot=iw/n, bw=Math.min(46,slot*.56);
+    var h='<defs><linearGradient id="gBar" x1="0" y1="1" x2="0" y2="0">'+
+      '<stop offset="0" stop-color="#6b1320"/><stop offset="1" stop-color="#f2b705"/></linearGradient></defs>';
+    for(var g=0;g<=max;g+=Math.max(1,max/4)){
+      var y=T+ih-(g/max)*ih;
+      h+='<line x1="'+L+'" y1="'+y+'" x2="'+(W-R)+'" y2="'+y+'" stroke="rgba(255,255,255,.07)" stroke-width="1"/>';
+      h+='<text x="'+(L-9)+'" y="'+(y+4)+'" text-anchor="end" fill="#80706a" style="font:600 10px Inter,sans-serif">'+Math.round(g)+'</text>';
+    }
+    var pts=[];
+    DATA.forEach(function(d,i){
+      var cx=L+slot*i+slot/2, bh=(d.n/max)*ih, y=T+ih-bh;
+      pts.push([cx,y]);
+      h+='<rect class="raBar" x="'+(cx-bw/2)+'" y="'+(T+ih)+'" width="'+bw+'" height="0" rx="5" fill="url(#gBar)"'+
+         ' data-y="'+y+'" data-h="'+bh+'" style="transition:y .9s cubic-bezier(.2,.8,.2,1) '+(i*.07)+'s,height .9s cubic-bezier(.2,.8,.2,1) '+(i*.07)+'s"><title>'+d.y+': '+d.n+'</title></rect>';
+      h+='<text x="'+cx+'" y="'+(T+ih+18)+'" text-anchor="middle" fill="#b3a39c" style="font:700 10px Inter,sans-serif">'+d.y+'</text>';
+      h+='<text class="raVal" x="'+cx+'" y="'+(y-7)+'" text-anchor="middle" fill="#ffd95e" opacity="0" style="font:700 11px \'Space Grotesk\',sans-serif;transition:opacity .5s '+(0.5+i*.07)+'s">'+d.n+'</text>';
+    });
+    var dstr=pts.map(function(p,i){return (i?'L':'M')+p[0]+' '+p[1]}).join(' ');
+    h+='<path class="raLine" d="'+dstr+'" fill="none" stroke="#ffd95e" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" opacity=".85" stroke-dasharray="1400" stroke-dashoffset="1400" style="transition:stroke-dashoffset 1.5s ease .5s"/>';
+    pts.forEach(function(p,i){
+      h+='<circle class="raDotC" cx="'+p[0]+'" cy="'+p[1]+'" r="3.6" fill="#0a0608" stroke="#ffd95e" stroke-width="2" opacity="0" style="transition:opacity .4s '+(0.7+i*.07)+'s"/>';
+    });
+    svg.innerHTML=h;
+    requestAnimationFrame(function(){
+      svg.querySelectorAll('.raBar').forEach(function(b){b.setAttribute('y',b.dataset.y);b.setAttribute('height',b.dataset.h);});
+      svg.querySelectorAll('.raVal,.raDotC').forEach(function(e){e.setAttribute('opacity',e.classList.contains('raVal')?'1':'1');});
+      var ln=svg.querySelector('.raLine'); if(ln)ln.setAttribute('stroke-dashoffset','0');
+    });
+  }
+
+  function counters(){
+    document.querySelectorAll('.ra-num').forEach(function(el){
+      var end=+el.dataset.count,st=null,dur=1100;
+      function step(ts){ if(!st)st=ts; var p=Math.min((ts-st)/dur,1);
+        el.textContent=Math.round(end*(1-Math.pow(1-p,3)));
+        if(p<1)requestAnimationFrame(step); }
+      requestAnimationFrame(step);
+    });
+  }
+
+  function boot(){ if(drawn)return; drawn=true; donut(); bars(); counters(); }
+
+  var sec=document.getElementById('publications');
+  if('IntersectionObserver' in window && sec){
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ boot(); io.disconnect(); } });
+    },{threshold:.12});
+    io.observe(sec);
+  } else { boot(); }
+  setTimeout(boot,2600);
+
+  /* filters */
+  document.querySelectorAll('.ra-filter').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var f=btn.dataset.filter;
+      document.querySelectorAll('.ra-filter').forEach(function(b){b.classList.toggle('is-on',b===btn)});
+      document.querySelectorAll('#pubList .pub-card').forEach(function(c){
+        var isS=c.dataset.scopus==='true';
+        c.classList.toggle('is-hidden', f==='scopus'?!isS : f==='non'?isS : false);
+      });
+    });
+  });
+})();
+</script>
+</body></html>
